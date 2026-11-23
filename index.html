@@ -1,0 +1,3629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leles Parfun — Perfumaria & Beleza | Catálogo, CRM & Admin</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter & Cormorant Garamond -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Cormorant Garamond', 'serif'],
+          },
+          colors: {
+            brand: {
+              50: '#FDF4F5',
+              100: '#FCE7EA',
+              200: '#F8D0D7',
+              300: '#F2AEB9',
+              400: '#E88295',
+              500: '#D95B74',
+              600: '#C43E5B',
+              700: '#A42D49',
+              800: '#88273F',
+              900: '#74243A',
+            },
+            nude: {
+              50: '#FAF6F2',
+              100: '#F4ECE3',
+              200: '#E8D8C8',
+              300: '#D8BFA8',
+              400: '#C29F82',
+              500: '#A88265',
+              700: '#6E503B',
+              800: '#523B2C',
+              900: '#3A291F',
+            }
+          },
+          boxShadow: {
+            soft: '0 10px 30px -10px rgba(164, 45, 73, 0.12)',
+            card: '0 4px 20px -2px rgba(82, 59, 44, 0.08)',
+            floating: '0 20px 45px -12px rgba(58, 41, 31, 0.22)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg-page: #FAF6F2;
+      --bg-surface: #FFFFFF;
+      --bg-accent-soft: #FCE7EA;
+      --color-primary: #C43E5B;
+      --color-primary-hover: #A42D49;
+      --color-secondary: #8A5A44;
+      --color-text-main: #3A291F;
+      --color-text-muted: #7C6355;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--color-text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .font-editorial {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4ECE3;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #DFC2B0;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C43E5B;
+    }
+
+    .glass-nav {
+      background: rgba(250, 246, 242, 0.90);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .product-card {
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 34px -12px rgba(164, 45, 73, 0.16);
+    }
+
+    @keyframes galleryFadeZoom {
+      0% {
+        opacity: 0.25;
+        transform: scale(1.06);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .gallery-slide-anim {
+      animation: galleryFadeZoom 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .toast-anim {
+      animation: toastIn 0.25s ease-out forwards;
+    }
+
+    .badge-pulse {
+      animation: pulseGlow 2.4s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(196, 62, 91, 0.35); }
+      50% { box-shadow: 0 0 0 8px rgba(196, 62, 91, 0); }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #receiptPrintArea, #receiptPrintArea * { visibility: visible; }
+      #receiptPrintArea {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #fff;
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-brand-200 selection:text-brand-900">
+
+  <!-- =====================================================================
+       TOAST NOTIFICATION CONTAINER
+  ====================================================================== -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- =====================================================================
+       TOP PROMOTIONAL BAR (AVON CATALOG STYLE)
+  ====================================================================== -->
+  <div id="promoTopBar" class="bg-gradient-to-r from-nude-900 via-brand-800 to-nude-900 text-nude-50 text-xs sm:text-sm py-2 px-4 text-center font-medium tracking-wide">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <span class="hidden md:inline-flex items-center gap-1.5 text-brand-200">
+        <i class="ph-fill ph-sparkle"></i> Revista Digital Leles Parfun
+      </span>
+      <p id="promoTopText" class="mx-auto truncate">
+        Frete grátis em compras acima de R$ 199 • Use o cupom <strong class="underline text-brand-200">LELES15</strong> e ganhe 15% OFF
+      </p>
+      <button onclick="openAdminPortal()" class="shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 text-white px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer">
+        <i class="ph-bold ph-shield-check"></i> Admin / CRM
+      </button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MAIN HEADER / NAVIGATION
+  ====================================================================== -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-nude-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
+        <!-- Brand Logo -->
+        <button onclick="switchView('store')" class="flex items-center gap-3 text-left group cursor-pointer shrink-0">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-brand-500 to-nude-500 flex items-center justify-center text-white shadow-soft group-hover:scale-105 transition">
+            <i class="ph-fill ph-flower-lotus text-2xl"></i>
+          </div>
+          <div>
+            <span id="headerBrandName" class="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-nude-900 block leading-none">
+              Leles Parfun
+            </span>
+            <span id="headerBrandTagline" class="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-brand-600 font-semibold">
+              Essência & Elegância
+            </span>
+          </div>
+        </button>
+
+        <!-- Center Search (Storefront) -->
+        <div id="storeSearchWrapper" class="hidden md:flex flex-1 max-w-md mx-4">
+          <div class="relative w-full">
+            <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-nude-400 text-lg"></i>
+            <input
+              id="searchInputDesktop"
+              type="text"
+              oninput="handleSearchInput(this.value)"
+              placeholder="Buscar perfumes, notas florais, cremes, kits..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-nude-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-200/60 outline-none text-sm text-nude-900 placeholder:text-nude-400 transition"
+            />
+          </div>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5">
+          <button
+            onclick="switchView('store')"
+            id="navStoreBtn"
+            class="px-3 py-2 rounded-full text-xs sm:text-sm font-semibold transition cursor-pointer bg-brand-100 text-brand-700"
+          >
+            Catálogo
+          </button>
+
+          <button
+            onclick="openVipSignupModal()"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-semibold bg-nude-100 hover:bg-brand-100 text-nude-800 hover:text-brand-700 transition cursor-pointer"
+            title="Cadastre-se no Clube VIP Leles Parfun"
+          >
+            <i class="ph-bold ph-crown text-brand-600"></i>
+            <span>Clube VIP</span>
+          </button>
+
+          <button
+            onclick="openQuizModal()"
+            class="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-semibold bg-nude-100 hover:bg-brand-100 text-nude-800 hover:text-brand-700 transition cursor-pointer"
+            title="Descubra sua fragrância ideal"
+          >
+            <i class="ph-bold ph-sparkle text-brand-600"></i>
+            <span>Descubra</span>
+          </button>
+
+          <button
+            onclick="openWishlistDrawer()"
+            class="relative p-2.5 rounded-full bg-white hover:bg-brand-50 border border-nude-200 text-nude-800 hover:text-brand-600 transition cursor-pointer"
+            aria-label="Lista de desejos"
+            title="Lista de Desejos"
+          >
+            <i class="ph-bold ph-heart text-xl"></i>
+            <span id="wishlistBadge" class="hidden -top-1 -right-1 absolute min-w-[20px] h-5 px-1 rounded-full bg-nude-700 text-white text-[11px] font-bold flex items-center justify-center">
+              0
+            </span>
+          </button>
+
+          <button
+            onclick="openCustomerPortal()"
+            id="navCustomerBtn"
+            class="px-3 py-2 rounded-full text-xs sm:text-sm font-semibold bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 transition flex items-center gap-1.5 cursor-pointer"
+            title="Área e Login do Cliente"
+          >
+            <i class="ph-bold ph-user-circle text-base"></i>
+            <span id="navCustomerLabel" class="hidden sm:inline">Minha Conta</span>
+          </button>
+
+          <button
+            onclick="openAdminPortal()"
+            id="navAdminBtn"
+            class="px-3 sm:px-3.5 py-2 rounded-full text-xs sm:text-sm font-semibold bg-nude-900 hover:bg-brand-700 text-white transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <i class="ph-bold ph-sliders-horizontal"></i>
+            <span class="hidden sm:inline">Painel Admin</span>
+          </button>
+
+          <button
+            onclick="toggleCartDrawer(true)"
+            class="relative p-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-soft transition cursor-pointer"
+            aria-label="Abrir sacola de compras"
+          >
+            <i class="ph-bold ph-shopping-bag text-xl"></i>
+            <span id="cartBadge" class="badge-pulse -top-1 -right-1 absolute min-w-[20px] h-5 px-1 rounded-full bg-nude-900 text-white text-[11px] font-bold flex items-center justify-center">
+              0
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Search Bar -->
+      <div id="storeSearchMobile" class="md:hidden pb-3">
+        <div class="relative w-full">
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-nude-400 text-base"></i>
+          <input
+            id="searchInputMobile"
+            type="text"
+            oninput="handleSearchInput(this.value)"
+            placeholder="Buscar na revista Leles Parfun..."
+            class="w-full pl-9 pr-4 py-2 rounded-full bg-white border border-nude-200 focus:border-brand-400 outline-none text-sm text-nude-900"
+          />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       VIEW 1: PUBLIC STOREFRONT (AVON CATALOG EXPERIENCE)
+  ====================================================================== -->
+  <main id="storefrontView" class="flex-1">
+    <!-- Hero Banner -->
+    <section class="relative overflow-hidden bg-gradient-to-br from-brand-100 via-nude-50 to-nude-200/70 border-b border-nude-200/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-brand-200 text-brand-700 text-xs font-semibold shadow-sm">
+              <i class="ph-fill ph-sparkle text-brand-500"></i>
+              <span id="heroBadgeText">Campanha Especial • Fragrâncias Exclusivas</span>
+            </div>
+
+            <h1 id="heroTitle" class="font-editorial text-4xl sm:text-5xl lg:text-6xl font-bold text-nude-900 leading-[1.05]">
+              A arte de perfumar seus melhores momentos com <span class="text-brand-600 italic">Leles Parfun</span>
+            </h1>
+
+            <p id="heroSubtitle" class="text-sm sm:text-base lg:text-lg text-nude-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Inspirada na praticidade e no encantamento dos catálogos icônicos, nossa curadoria reúne perfumes autorais, colônias envolventes e cuidados corporais em tons suaves de rosa e nude.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
+              <a href="#catalogo-produtos" class="px-6 py-3.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition inline-flex items-center gap-2">
+                <span>Explorar Catálogo</span>
+                <i class="ph-bold ph-arrow-down"></i>
+              </a>
+              <button onclick="openVipSignupModal()" class="px-5 py-3.5 rounded-full bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 font-semibold text-sm transition inline-flex items-center gap-2 cursor-pointer">
+                <i class="ph-bold ph-crown"></i>
+                <span>Cadastrar no Clube VIP</span>
+              </button>
+              <button onclick="openQuizModal()" class="px-5 py-3.5 rounded-full bg-nude-900 hover:bg-nude-800 text-white font-semibold text-sm transition inline-flex items-center gap-2 cursor-pointer">
+                <i class="ph-bold ph-magic-wand"></i>
+                <span>Quiz de Fragrância</span>
+              </button>
+            </div>
+
+            <!-- Trust Highlights -->
+            <div class="grid grid-cols-3 gap-3 pt-4 max-w-lg mx-auto lg:mx-0 text-left">
+              <div class="bg-white/75 backdrop-blur rounded-2xl p-3 border border-nude-200/80">
+                <p class="text-xs font-bold text-nude-900 flex items-center gap-1">
+                  <i class="ph-fill ph-seal-check text-brand-600"></i> Original
+                </p>
+                <p class="text-[11px] text-nude-700 mt-0.5">Alta fixação garantida</p>
+              </div>
+              <div class="bg-white/75 backdrop-blur rounded-2xl p-3 border border-nude-200/80">
+                <p class="text-xs font-bold text-nude-900 flex items-center gap-1">
+                  <i class="ph-fill ph-credit-card text-brand-600"></i> Até 6x
+                </p>
+                <p class="text-[11px] text-nude-700 mt-0.5">Parcelas sem juros</p>
+              </div>
+              <div class="bg-white/75 backdrop-blur rounded-2xl p-3 border border-nude-200/80">
+                <p class="text-xs font-bold text-nude-900 flex items-center gap-1">
+                  <i class="ph-fill ph-whatsapp-logo text-brand-600"></i> Consultoria
+                </p>
+                <p class="text-[11px] text-nude-700 mt-0.5">Atendimento direto</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Featured Showcase Card -->
+          <div class="lg:col-span-5">
+            <div class="relative bg-white rounded-[2rem] p-4 sm:p-5 border border-nude-200 shadow-floating">
+              <div class="relative rounded-[1.5rem] overflow-hidden aspect-[4/4.3] bg-nude-100">
+                <img
+                  id="heroFeaturedImg"
+                  src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&q=80"
+                  onerror="this.src='https://placehold.co/700x760/FCE7EA/A42D49?text=Leles+Parfun'"
+                  alt="Destaque Leles Parfun"
+                  class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-nude-900/75 via-transparent to-transparent"></div>
+                <div class="absolute top-3.5 left-3.5 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+                  Destaque da Revista
+                </div>
+                <div class="absolute bottom-4 left-4 right-4 text-white">
+                  <p class="text-xs uppercase tracking-widest text-brand-200 font-semibold">Eau de Parfum • 100ml</p>
+                  <h3 id="heroFeaturedTitle" class="font-editorial text-2xl sm:text-3xl font-bold leading-tight">
+                    Rosa de Cetim & Baunilha Nude
+                  </h3>
+                  <div class="flex items-center justify-between mt-2">
+                    <span id="heroFeaturedPrice" class="text-lg font-bold text-white">R$ 159,90</span>
+                    <button onclick="quickAddFeatured()" class="px-3.5 py-1.5 rounded-full bg-white text-brand-700 hover:bg-brand-50 text-xs font-bold transition cursor-pointer">
+                      + Adicionar à Sacola
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Pills & Catalog Controls -->
+    <section id="catalogo-produtos" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Vitrine Interativa</span>
+          <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-nude-900 mt-1">
+            Catálogo Leles Parfun
+          </h2>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span id="catalogCountLabel" class="text-xs sm:text-sm text-nude-700 font-medium mr-1"></span>
+          <select
+            id="sortSelect"
+            onchange="renderStorefront()"
+            class="px-3.5 py-2 rounded-full bg-white border border-nude-200 text-xs sm:text-sm font-medium text-nude-800 focus:border-brand-400 outline-none cursor-pointer"
+          >
+            <option value="featured">Ordenar: Destaques</option>
+            <option value="price-asc">Menor preço</option>
+            <option value="price-desc">Maior preço</option>
+            <option value="name-asc">Nome (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div id="categoryTabs" class="flex items-center gap-2 overflow-x-auto pb-3 mb-7"></div>
+
+      <!-- Products Grid -->
+      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6"></div>
+
+      <!-- Empty State -->
+      <div id="emptyCatalogState" class="hidden text-center py-16 px-4 bg-white rounded-3xl border border-nude-200 mt-6">
+        <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+          <i class="ph ph-magnifying-glass"></i>
+        </div>
+        <h3 class="font-editorial text-2xl font-bold text-nude-900">Nenhuma fragrância encontrada</h3>
+        <p class="text-sm text-nude-700 mt-1 max-w-md mx-auto">
+          Tente buscar por outro termo ou limpe os filtros para visualizar todo o catálogo Leles Parfun.
+        </p>
+        <button onclick="resetCatalogFilters()" class="mt-4 px-5 py-2.5 rounded-full bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition cursor-pointer">
+          Mostrar todos os produtos
+        </button>
+      </div>
+    </section>
+
+    <!-- Avon-Style Lead / Consultoria Section -->
+    <section class="bg-gradient-to-r from-brand-100/80 via-nude-100 to-brand-100/80 border-y border-nude-200 py-12 sm:py-16">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-[2rem] p-6 sm:p-10 shadow-card border border-nude-200 grid md:grid-cols-12 gap-8 items-center">
+          <div class="md:col-span-6 space-y-3">
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-3 py-1 rounded-full">
+              <i class="ph-fill ph-gift"></i> Clube VIP & Amostras
+            </span>
+            <h3 class="font-editorial text-3xl sm:text-4xl font-bold text-nude-900 leading-tight">
+              Receba novidades da revista e ofertas exclusivas no seu WhatsApp
+            </h3>
+            <p class="text-sm text-nude-700 leading-relaxed">
+              Cadastre-se para receber promoções relâmpago, lançamentos da Leles Parfun e atendimento personalizado. Seu cadastro entra automaticamente no nosso <strong>CRM</strong>.
+            </p>
+          </div>
+
+          <form id="leadCaptureForm" onsubmit="handleLeadSubmit(event)" class="md:col-span-6 space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Seu nome completo *</label>
+              <input
+                id="leadName"
+                type="text"
+                required
+                placeholder="Ex.: Mariana Souza"
+                class="w-full px-4 py-2.5 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+              />
+            </div>
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">WhatsApp *</label>
+                <input
+                  id="leadPhone"
+                  type="tel"
+                  required
+                  placeholder="(33) 99999-0000"
+                  class="w-full px-4 py-2.5 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Preferência olfativa</label>
+                <select
+                  id="leadInterest"
+                  class="w-full px-4 py-2.5 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+                >
+                  <option value="Floral & Delicado">Floral & Delicado</option>
+                  <option value="Adocicado & Baunilha">Adocicado & Baunilha</option>
+                  <option value="Amadeirado & Marcante">Amadeirado & Marcante</option>
+                  <option value="Cuidados Corporais">Cuidados Corporais</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition flex items-center justify-center gap-2 cursor-pointer">
+              <i class="ph-bold ph-paper-plane-right"></i>
+              <span>Quero Participar do Clube Leles Parfun</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       VIEW 2: FULL ADMIN PANEL (DASHBOARD, CRUD, CRM, ORDERS, CMS, SECURITY)
+  ====================================================================== -->
+  <section id="adminView" class="hidden flex-1 bg-nude-50/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+      <!-- Admin Top Header -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-nude-200">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-700 bg-brand-100 px-3 py-1 rounded-full">
+            <i class="ph-fill ph-crown"></i> Administração Total • Leles Parfun
+          </div>
+          <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-nude-900 mt-1.5">
+            Central de Gestão, CRUD, CRM & Aparência
+          </h1>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="switchView('store')" class="px-4 py-2.5 rounded-xl bg-white hover:bg-brand-50 border border-nude-200 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-storefront"></i> Ver Loja ao Vivo
+          </button>
+          <button onclick="exportSystemBackup()" class="px-3.5 py-2.5 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-download-simple"></i> Backup JSON
+          </button>
+          <button onclick="document.getElementById('importBackupInput').click()" class="px-3.5 py-2.5 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-upload-simple"></i> Restaurar
+          </button>
+          <input id="importBackupInput" type="file" accept=".json" onchange="importSystemBackup(event)" class="hidden" />
+          <button onclick="resetDemoData()" class="px-3.5 py-2.5 rounded-xl bg-nude-200/80 hover:bg-nude-300 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i> Restaurar Padrão
+          </button>
+          <button onclick="logoutAdmin()" class="px-4 py-2.5 rounded-xl bg-nude-900 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-sign-out"></i> Sair
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Navigation Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto py-4 border-b border-nude-200/80 mb-7">
+        <button data-admin-tab="dashboard" onclick="switchAdminTab('dashboard')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer bg-brand-600 text-white shadow-sm">
+          <i class="ph-bold ph-chart-line-up"></i> Dashboard
+        </button>
+        <button data-admin-tab="products" onclick="switchAdminTab('products')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer bg-white hover:bg-brand-50 text-nude-800 border border-nude-200">
+          <i class="ph-bold ph-package"></i> Produtos (CRUD)
+        </button>
+        <button data-admin-tab="crm" onclick="switchAdminTab('crm')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer bg-white hover:bg-brand-50 text-nude-800 border border-nude-200">
+          <i class="ph-bold ph-users-three"></i> Clientes (CRM)
+        </button>
+        <button data-admin-tab="orders" onclick="switchAdminTab('orders')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer bg-white hover:bg-brand-50 text-nude-800 border border-nude-200">
+          <i class="ph-bold ph-receipt"></i> Pedidos
+        </button>
+        <button data-admin-tab="appearance" onclick="switchAdminTab('appearance')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer bg-white hover:bg-brand-50 text-nude-800 border border-nude-200">
+          <i class="ph-bold ph-palette"></i> Editar Página (CMS)
+        </button>
+        <button data-admin-tab="security" onclick="switchAdminTab('security')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer bg-white hover:bg-brand-50 text-nude-800 border border-nude-200">
+          <i class="ph-bold ph-key"></i> Segurança & Senha
+        </button>
+      </div>
+
+      <!-- TAB 1: DASHBOARD -->
+      <div id="adminTab-dashboard" class="admin-tab-panel space-y-6">
+        <div id="kpiCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5"></div>
+
+        <div class="grid lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-nude-200 shadow-card">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-editorial text-2xl font-bold text-nude-900">Vendas por Categoria</h3>
+                <p class="text-xs text-nude-700">Receita acumulada nos pedidos registrados</p>
+              </div>
+              <i class="ph-fill ph-chart-bar text-2xl text-brand-500"></i>
+            </div>
+            <div id="categorySalesChart" class="space-y-4"></div>
+          </div>
+
+          <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-nude-200 shadow-card">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-editorial text-2xl font-bold text-nude-900">Alerta de Estoque</h3>
+                <p class="text-xs text-nude-700">Itens com estoque baixo ou esgotado</p>
+              </div>
+              <i class="ph-fill ph-warning-circle text-2xl text-brand-600"></i>
+            </div>
+            <div id="lowStockList" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: PRODUCTS CRUD -->
+      <div id="adminTab-products" class="admin-tab-panel hidden space-y-6">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-nude-200 shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-nude-900">Catálogo de Produtos (CRUD)</h2>
+              <p class="text-xs sm:text-sm text-nude-700">Adicione, edite, duplique, ajuste estoque ou remova itens da revista Leles Parfun.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="exportProductsCSV()" class="px-3.5 py-2.5 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+                <i class="ph-bold ph-file-csv"></i> Exportar CSV
+              </button>
+              <button onclick="openProductModal()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-soft transition inline-flex items-center gap-2 cursor-pointer">
+                <i class="ph-bold ph-plus-circle"></i> Novo Produto
+              </button>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-3 gap-3 mb-5">
+            <div class="sm:col-span-2 relative">
+              <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-nude-400"></i>
+              <input
+                id="adminProductSearch"
+                type="text"
+                oninput="renderAdminProductsTable()"
+                placeholder="Filtrar por nome, SKU, linha ou categoria..."
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+              />
+            </div>
+            <select id="adminProductCategoryFilter" onchange="renderAdminProductsTable()" class="px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none">
+              <option value="Todas">Todas as categorias</option>
+              <option value="Perfumaria Feminina">Perfumaria Feminina</option>
+              <option value="Perfumaria Masculina">Perfumaria Masculina</option>
+              <option value="Colônias & Body Splash">Colônias & Body Splash</option>
+              <option value="Cuidados Corporais">Cuidados Corporais</option>
+              <option value="Kits & Presentes">Kits & Presentes</option>
+            </select>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-nude-200 text-[11px] uppercase tracking-wider text-nude-700 bg-nude-50/80">
+                  <th class="py-3 px-4 rounded-tl-xl">Produto / SKU</th>
+                  <th class="py-3 px-4">Categoria</th>
+                  <th class="py-3 px-4">Preço</th>
+                  <th class="py-3 px-4">Estoque</th>
+                  <th class="py-3 px-4">Selo / Status</th>
+                  <th class="py-3 px-4 text-right rounded-tr-xl">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="adminProductsTableBody" class="divide-y divide-nude-100 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: CRM CUSTOMERS -->
+      <div id="adminTab-crm" class="admin-tab-panel hidden space-y-6">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-nude-200 shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-nude-900">CRM de Clientes & Leads</h2>
+              <p class="text-xs sm:text-sm text-nude-700">Cadastre clientes, acompanhe preferências olfativas, histórico de compras e faça contato direto.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="exportCustomersCSV()" class="px-3.5 py-2.5 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+                <i class="ph-bold ph-file-csv"></i> Exportar CSV
+              </button>
+              <button onclick="openCustomerModal()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-soft transition inline-flex items-center gap-2 cursor-pointer">
+                <i class="ph-bold ph-user-plus"></i> Novo Cliente
+              </button>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-3 gap-3 mb-5">
+            <div class="sm:col-span-2 relative">
+              <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-nude-400"></i>
+              <input
+                id="crmSearchInput"
+                type="text"
+                oninput="renderCRMTable()"
+                placeholder="Buscar cliente por nome, WhatsApp, e-mail ou preferência..."
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+              />
+            </div>
+            <select id="crmStageFilter" onchange="renderCRMTable()" class="px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none">
+              <option value="Todos">Todos os estágios</option>
+              <option value="VIP Recorrente">VIP Recorrente</option>
+              <option value="Cliente Ativo">Cliente Ativo</option>
+              <option value="Novo Lead">Novo Lead</option>
+            </select>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-nude-200 text-[11px] uppercase tracking-wider text-nude-700 bg-nude-50/80">
+                  <th class="py-3 px-4 rounded-tl-xl">Cliente</th>
+                  <th class="py-3 px-4">Contato</th>
+                  <th class="py-3 px-4">Estágio & Perfil</th>
+                  <th class="py-3 px-4">Compras / Total</th>
+                  <th class="py-3 px-4 text-right rounded-tr-xl">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="crmTableBody" class="divide-y divide-nude-100 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: ORDERS -->
+      <div id="adminTab-orders" class="admin-tab-panel hidden space-y-6">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-nude-200 shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-nude-900">Pedidos da Loja & Catálogo</h2>
+              <p class="text-xs sm:text-sm text-nude-700">Gerencie status de entrega, emita recibos e notifique clientes pelo WhatsApp.</p>
+            </div>
+            <select id="orderStatusFilter" onchange="renderOrdersList()" class="px-4 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none">
+              <option value="Todos">Todos os status</option>
+              <option value="Novo Pedido">Novo Pedido</option>
+              <option value="Em Separação">Em Separação</option>
+              <option value="Enviado">Enviado</option>
+              <option value="Entregue">Entregue</option>
+            </select>
+          </div>
+
+          <div id="ordersListContainer" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- TAB 5: APPEARANCE & PAGE CMS -->
+      <div id="adminTab-appearance" class="admin-tab-panel hidden space-y-6">
+        <form id="cmsForm" onsubmit="saveCMSConfig(event)" class="grid lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-nude-200 shadow-card space-y-4">
+            <h3 class="font-editorial text-2xl font-bold text-nude-900">Identidade & Textos da Vitrine</h3>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Nome da Marca</label>
+                <input id="cmsBrandName" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Slogan / Subtítulo</label>
+                <input id="cmsBrandTagline" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Barra Promocional do Topo</label>
+              <input id="cmsPromoTopText" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Selo do Banner Principal</label>
+                <input id="cmsHeroBadge" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">WhatsApp da Loja (com DDD)</label>
+                <input id="cmsStoreWhatsapp" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Título Principal (Hero)</label>
+              <input id="cmsHeroTitle" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Descrição do Banner</label>
+              <textarea id="cmsHeroSubtitle" rows="3" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400"></textarea>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-nude-200 shadow-card space-y-4">
+            <h3 class="font-editorial text-2xl font-bold text-nude-900">Paleta Rosa & Bege + Cupons</h3>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Estilo de Tom Rosa & Bege</label>
+              <select id="cmsThemePreset" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400">
+                <option value="rose-nude">Rosa Rosé & Bege Clássico (Padrão)</option>
+                <option value="blush-champagne">Rosa Blush & Champanhe Suave</option>
+                <option value="berry-sand">Rosa Cereja & Areia Quente</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Cor Primária (Rosa)</label>
+                <input id="cmsPrimaryColor" type="color" class="w-full h-11 rounded-xl border border-nude-200 cursor-pointer p-1 bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Fundo Bege</label>
+                <input id="cmsBgColor" type="color" class="w-full h-11 rounded-xl border border-nude-200 cursor-pointer p-1 bg-white" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Cupom Ativo</label>
+                <input id="cmsCouponCode" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm uppercase font-bold outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-nude-800 mb-1">Desconto (%)</label>
+                <input id="cmsCouponDiscount" type="number" min="1" max="80" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Frete Grátis a partir de (R$)</label>
+              <input id="cmsFreeShippingMin" type="number" min="0" step="1" required class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none" />
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition flex items-center justify-center gap-2 cursor-pointer mt-2">
+              <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações na Página
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB 6: SECURITY & PASSWORD -->
+      <div id="adminTab-security" class="admin-tab-panel hidden space-y-6">
+        <div class="grid lg:grid-cols-12 gap-6">
+          <form id="changePasswordForm" onsubmit="handleChangeAdminPassword(event)" class="lg:col-span-6 bg-white rounded-3xl p-6 border border-nude-200 shadow-card space-y-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-xl">
+                <i class="ph-fill ph-shield-check"></i>
+              </div>
+              <div>
+                <h3 class="font-editorial text-2xl font-bold text-nude-900">Alterar Senha do Administrador</h3>
+                <p class="text-xs text-nude-700">Proteja o acesso ao Painel Admin, CRUD e CRM da Leles Parfun.</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Senha Atual *</label>
+              <input id="currentAdminPassword" type="password" required placeholder="Digite a senha atual" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Nova Senha (mínimo 6 caracteres) *</label>
+              <input id="newAdminPassword" type="password" required minlength="6" oninput="updatePasswordStrengthMeter(this.value)" placeholder="Crie uma nova senha forte" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+              <div class="mt-2">
+                <div class="h-1.5 w-full bg-nude-100 rounded-full overflow-hidden">
+                  <div id="passwordStrengthBar" class="h-full w-0 bg-brand-500 transition-all duration-300"></div>
+                </div>
+                <p id="passwordStrengthText" class="text-[11px] text-nude-700 mt-1">Força da senha: aguardando nova senha</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Confirmar Nova Senha *</label>
+              <input id="confirmAdminPassword" type="password" required minlength="6" placeholder="Repita a nova senha" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-nude-800 mb-1">Dica de Senha (opcional)</label>
+              <input id="adminPasswordHint" type="text" placeholder="Ex.: Nome da loja + ano" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition flex items-center justify-center gap-2 cursor-pointer">
+              <i class="ph-bold ph-lock-key"></i> Atualizar Senha do Admin
+            </button>
+          </form>
+
+          <div class="lg:col-span-6 space-y-6">
+            <div class="bg-white rounded-3xl p-6 border border-nude-200 shadow-card space-y-3">
+              <h3 class="font-editorial text-2xl font-bold text-nude-900">Recuperação por Código Mestre</h3>
+              <p class="text-xs sm:text-sm text-nude-700 leading-relaxed">
+                Caso esqueça a senha personalizada, utilize o código mestre de recuperação <code class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-bold">LELES2026</code> na tela de login para redefinir o acesso com segurança.
+              </p>
+              <div id="currentHintBox" class="p-3.5 rounded-2xl bg-nude-50 border border-nude-200 text-xs text-nude-800"></div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-nude-200 shadow-card">
+              <h3 class="font-editorial text-2xl font-bold text-nude-900 mb-3">Histórico de Segurança</h3>
+              <div id="securityLogsList" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       VIEW 3: CUSTOMER PORTAL (LOGIN, ORDERS, TRACKING & FAVORITES)
+  ====================================================================== -->
+  <section id="customerView" class="hidden flex-1 bg-gradient-to-b from-brand-50/60 via-nude-50 to-nude-100/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-nude-200">
+        <div>
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-700 bg-brand-100 px-3 py-1 rounded-full">
+            <i class="ph-fill ph-user-circle"></i> Espaço da Cliente • Leles Parfun
+          </span>
+          <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-nude-900 mt-1.5">
+            Minha Conta, Pedidos & Favoritos
+          </h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="switchView('store')" class="px-4 py-2.5 rounded-xl bg-white hover:bg-brand-50 border border-nude-200 text-nude-800 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-storefront"></i> Voltar à Revista
+          </button>
+          <button id="customerLogoutBtn" onclick="logoutCustomerAccount()" class="hidden px-4 py-2.5 rounded-xl bg-nude-900 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold transition inline-flex items-center gap-1.5 cursor-pointer">
+            <i class="ph-bold ph-sign-out"></i> Sair da Conta
+          </button>
+        </div>
+      </div>
+
+      <!-- Customer Login / Quick Register Card -->
+      <div id="customerLoginCard" class="max-w-2xl mx-auto mt-8 bg-white rounded-[2rem] p-6 sm:p-8 border border-nude-200 shadow-card">
+        <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-2xl mb-3">
+          <i class="ph-fill ph-sparkle"></i>
+        </div>
+        <h2 class="font-editorial text-3xl font-bold text-nude-900">Acesse seus Pedidos e Favoritos</h2>
+        <p class="text-xs sm:text-sm text-nude-700 mt-1">
+          Informe seu <strong>WhatsApp</strong> ou <strong>e-mail</strong> cadastrado na Leles Parfun para acompanhar a trajetória dos seus pedidos. (Dica: teste com <code class="px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold">(33) 99811-2233</code> ou <code class="px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold">camila.ferreira@exemplo.com</code>).
+        </p>
+
+        <form id="customerPortalLoginForm" onsubmit="handleCustomerLogin(event)" class="mt-5 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">WhatsApp ou E-mail *</label>
+            <input
+              id="customerLoginIdentifier"
+              type="text"
+              required
+              placeholder="Ex.: (33) 99811-2233 ou cliente@email.com"
+              class="w-full px-4 py-3 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+            />
+          </div>
+
+          <div class="flex flex-wrap gap-2.5">
+            <button type="submit" class="flex-1 py-3 px-5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition flex items-center justify-center gap-2 cursor-pointer">
+              <i class="ph-bold ph-sign-in"></i> Entrar na Minha Conta
+            </button>
+            <button type="button" onclick="openVipSignupModal()" class="py-3 px-4 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-900 font-semibold text-xs sm:text-sm transition cursor-pointer">
+              Criar Cadastro
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Authenticated Customer Dashboard -->
+      <div id="customerDashboardContent" class="hidden mt-7 space-y-6">
+        <!-- Customer Profile Summary -->
+        <div id="customerProfileBanner" class="bg-white rounded-3xl p-5 sm:p-6 border border-nude-200 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4"></div>
+
+        <!-- Tabs: Orders & Trajectory vs Favorites -->
+        <div class="flex items-center gap-2">
+          <button id="custTabOrdersBtn" onclick="switchCustomerPortalTab('orders')" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer">
+            <i class="ph-bold ph-package"></i> Meus Pedidos & Trajetória
+          </button>
+          <button id="custTabFavoritesBtn" onclick="switchCustomerPortalTab('favorites')" class="px-4 py-2.5 rounded-xl bg-white hover:bg-brand-50 text-nude-800 border border-nude-200 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer">
+            <i class="ph-bold ph-heart"></i> Produtos Favoritos
+          </button>
+        </div>
+
+        <!-- Orders & Trajectory List -->
+        <div id="customerOrdersSection" class="space-y-4"></div>
+
+        <!-- Favorites Grid -->
+        <div id="customerFavoritesSection" class="hidden">
+          <div id="customerFavoritesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       FOOTER
+  ====================================================================== -->
+  <footer class="bg-nude-900 text-nude-200 pt-12 pb-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-white/10">
+        <div class="space-y-3">
+          <h4 id="footerBrandName" class="font-editorial text-3xl font-bold text-white">Leles Parfun</h4>
+          <p class="text-xs sm:text-sm text-nude-300 leading-relaxed">
+            Perfumaria fina, colônias marcantes e cuidados diários com curadoria especial em tons de rosa e bege.
+          </p>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold uppercase tracking-wider text-brand-300 mb-3">Navegação</h5>
+          <ul class="space-y-2 text-sm">
+            <li><button onclick="switchView('store')" class="hover:text-white transition cursor-pointer">Catálogo Completo</button></li>
+            <li><button onclick="openVipSignupModal()" class="hover:text-white transition cursor-pointer">Clube VIP Leles</button></li>
+            <li><button onclick="openQuizModal()" class="hover:text-white transition cursor-pointer">Descubra sua Fragrância</button></li>
+            <li><button onclick="openAdminPortal()" class="hover:text-white transition cursor-pointer">Painel Administrativo</button></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold uppercase tracking-wider text-brand-300 mb-3">Cupons & Vantagens</h5>
+          <p class="text-xs text-nude-300 leading-relaxed">
+            Use <strong class="text-white">LELES15</strong> (15% OFF), <strong class="text-white">BEMVINDA10</strong> (10% OFF) ou <strong class="text-white">VIP20</strong> (20% OFF) na sacola.
+          </p>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold uppercase tracking-wider text-brand-300 mb-3">Atendimento Direto</h5>
+          <button onclick="contactStoreWhatsapp()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold inline-flex items-center gap-2 transition cursor-pointer">
+            <i class="ph-fill ph-whatsapp-logo text-lg"></i> Falar com Leles Parfun
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-nude-400">
+        <p>© <span id="currentYear"></span> Leles Parfun. Todos os direitos reservados.</p>
+        <p>Catálogo Digital • CRM • CRUD • CMS</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       SLIDE-OVER CART DRAWER
+  ====================================================================== -->
+  <div id="cartDrawerBackdrop" onclick="toggleCartDrawer(false)" class="hidden fixed inset-0 z-50 bg-nude-900/50 backdrop-blur-xs"></div>
+  <aside id="cartDrawer" class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-floating translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-5 border-b border-nude-200 flex items-center justify-between bg-nude-50">
+      <div class="flex items-center gap-2.5">
+        <i class="ph-fill ph-shopping-bag text-2xl text-brand-600"></i>
+        <div>
+          <h3 class="font-editorial text-2xl font-bold text-nude-900 leading-none">Sua Sacola</h3>
+          <span id="cartItemCountText" class="text-xs text-nude-700">0 itens selecionados</span>
+        </div>
+      </div>
+      <button onclick="toggleCartDrawer(false)" class="p-2 rounded-full hover:bg-nude-200/70 text-nude-700 transition cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Free Shipping Progress -->
+    <div class="px-5 py-3 bg-brand-50/70 border-b border-brand-100">
+      <p id="freeShippingProgressText" class="text-xs font-medium text-brand-800 mb-1.5"></p>
+      <div class="h-2 w-full bg-white rounded-full overflow-hidden border border-brand-200/60">
+        <div id="freeShippingBar" class="h-full w-0 bg-gradient-to-r from-brand-400 to-brand-600 transition-all duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Cart Items -->
+    <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-3.5"></div>
+
+    <!-- Cart Footer & Checkout -->
+    <div class="p-5 border-t border-nude-200 bg-nude-50/80 space-y-3.5">
+      <!-- Coupon -->
+      <div class="flex gap-2">
+        <input
+          id="couponInput"
+          type="text"
+          placeholder="Cupom (ex.: LELES15)"
+          class="flex-1 px-3.5 py-2 rounded-xl bg-white border border-nude-200 text-xs sm:text-sm uppercase font-semibold outline-none focus:border-brand-400"
+        />
+        <button onclick="applyCouponCode()" class="px-4 py-2 rounded-xl bg-nude-900 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold transition cursor-pointer">
+          Aplicar
+        </button>
+      </div>
+
+      <!-- CEP Shipping Estimator -->
+      <div class="flex gap-2">
+        <input
+          id="cartCepInput"
+          type="text"
+          maxlength="9"
+          oninput="maskCep(this)"
+          placeholder="CEP para frete (00000-000)"
+          class="flex-1 px-3.5 py-2 rounded-xl bg-white border border-nude-200 text-xs sm:text-sm outline-none focus:border-brand-400"
+        />
+        <button onclick="calculateCartShipping()" class="px-3.5 py-2 rounded-xl bg-nude-200 hover:bg-nude-300 text-nude-900 text-xs sm:text-sm font-semibold transition cursor-pointer">
+          Calcular
+        </button>
+      </div>
+      <p id="shippingEstimateText" class="text-xs text-nude-700"></p>
+
+      <!-- Totals -->
+      <div class="space-y-1 text-sm pt-1 border-t border-nude-200">
+        <div class="flex justify-between text-nude-700">
+          <span>Subtotal</span>
+          <span id="cartSubtotalLabel" class="font-semibold">R$ 0,00</span>
+        </div>
+        <div class="flex justify-between text-brand-700">
+          <span>Desconto (<span id="appliedCouponBadge">nenhum</span>)</span>
+          <span id="cartDiscountLabel" class="font-semibold">- R$ 0,00</span>
+        </div>
+        <div class="flex justify-between text-nude-700">
+          <span>Frete</span>
+          <span id="cartShippingLabel" class="font-semibold">R$ 0,00</span>
+        </div>
+        <div class="flex justify-between text-base font-bold text-nude-900 pt-1">
+          <span>Total</span>
+          <span id="cartTotalLabel" class="text-brand-700 text-lg">R$ 0,00</span>
+        </div>
+      </div>
+
+      <button onclick="openCheckoutModal()" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition flex items-center justify-center gap-2 cursor-pointer">
+        <i class="ph-bold ph-check-circle"></i> Finalizar Pedido
+      </button>
+    </div>
+  </aside>
+
+  <!-- =====================================================================
+       SLIDE-OVER WISHLIST DRAWER
+  ====================================================================== -->
+  <div id="wishlistDrawerBackdrop" onclick="closeWishlistDrawer()" class="hidden fixed inset-0 z-50 bg-nude-900/50 backdrop-blur-xs"></div>
+  <aside id="wishlistDrawer" class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-floating translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-5 border-b border-nude-200 flex items-center justify-between bg-brand-50/70">
+      <div class="flex items-center gap-2.5">
+        <i class="ph-fill ph-heart text-2xl text-brand-600"></i>
+        <div>
+          <h3 class="font-editorial text-2xl font-bold text-nude-900 leading-none">Lista de Desejos</h3>
+          <span class="text-xs text-nude-700">Seus favoritos na Leles Parfun</span>
+        </div>
+      </div>
+      <button onclick="closeWishlistDrawer()" class="p-2 rounded-full hover:bg-nude-200/70 text-nude-700 transition cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+    </div>
+    <div id="wishlistItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-3.5"></div>
+  </aside>
+
+  <!-- =====================================================================
+       MODAL: ADMIN LOGIN
+  ====================================================================== -->
+  <div id="adminLoginModal" class="hidden fixed inset-0 z-[70] bg-nude-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border border-nude-200 shadow-floating relative">
+      <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-nude-100 text-nude-700 cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+
+      <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-2xl mb-3">
+        <i class="ph-fill ph-lock-key"></i>
+      </div>
+      <h3 class="font-editorial text-3xl font-bold text-nude-900">Acesso Administrativo</h3>
+      <p class="text-xs sm:text-sm text-nude-700 mt-1">
+        Digite sua senha de administrador para acessar o painel, o CRUD e o CRM da Leles Parfun.
+      </p>
+
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="mt-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">Senha de Acesso</label>
+          <input
+            id="adminPasswordInput"
+            type="password"
+            required
+            placeholder="Digite sua senha"
+            class="w-full px-4 py-3 rounded-xl bg-nude-50 border border-nude-200 focus:border-brand-400 focus:bg-white outline-none text-sm"
+          />
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition cursor-pointer">
+          Entrar no Painel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: PRODUCT CRUD FORM
+  ====================================================================== -->
+  <div id="productModal" class="hidden fixed inset-0 z-[75] bg-nude-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 border border-nude-200 shadow-floating my-8 relative">
+      <button onclick="closeProductModal()" class="absolute top-5 right-5 p-2 rounded-full hover:bg-nude-100 text-nude-700 cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+
+      <h3 id="productModalTitle" class="font-editorial text-3xl font-bold text-nude-900 mb-1">Novo Produto</h3>
+      <p class="text-xs text-nude-700 mb-5">Preencha os dados do item para exibir na revista Leles Parfun.</p>
+
+      <form id="productForm" onsubmit="saveProductFromModal(event)" class="space-y-4">
+        <input type="hidden" id="prodEditId" />
+
+        <div class="grid sm:grid-cols-3 gap-3.5">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Nome do Produto *</label>
+            <input id="prodName" type="text" required placeholder="Ex.: Rosé Veludo Eau de Parfum" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">SKU *</label>
+            <input id="prodSku" type="text" required placeholder="LP-101" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm uppercase outline-none focus:border-brand-400" />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Categoria *</label>
+            <select id="prodCategory" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400">
+              <option value="Perfumaria Feminina">Perfumaria Feminina</option>
+              <option value="Perfumaria Masculina">Perfumaria Masculina</option>
+              <option value="Colônias & Body Splash">Colônias & Body Splash</option>
+              <option value="Cuidados Corporais">Cuidados Corporais</option>
+              <option value="Kits & Presentes">Kits & Presentes</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Preço (R$) *</label>
+            <input id="prodPrice" type="number" step="0.01" min="1" required placeholder="129.90" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Estoque (un.) *</label>
+            <input id="prodStock" type="number" min="0" required placeholder="15" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Volume / Medida</label>
+            <input id="prodVolume" type="text" placeholder="100ml" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Selo do Catálogo</label>
+            <select id="prodBadge" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400">
+              <option value="Mais Vendido">Mais Vendido</option>
+              <option value="Lançamento">Lançamento</option>
+              <option value="Oferta Especial">Oferta Especial</option>
+              <option value="">Sem selo</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Notas Olfativas</label>
+            <input id="prodNotes" type="text" placeholder="Rosa Damascena, Baunilha, Âmbar" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">URL da Imagem do Produto *</label>
+          <input id="prodImage" type="url" required placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          <div class="lg:col-span-6 space-y-6">
+            <div class="bg-white rounded-3xl p-6 border border-nude-200 shadow-card space-y-3">
+              <h3 class="font-editorial text-2xl font-bold text-nude-900">Recuperação de Acesso</h3>
+              <p class="text-xs sm:text-sm text-nude-700 leading-relaxed">
+                Caso esqueça sua senha personalizada, utilize seu código de recuperação autorizado na tela de login para redefinir o acesso com segurança.
+              </p>
+              <div id="currentHintBox" class="p-3.5 rounded-2xl bg-nude-50 border border-nude-200 text-xs text-nude-800"></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="document.getElementById('prodGalleryFileInput').click()" class="px-3 py-1.5 rounded-xl bg-brand-100 hover:bg-brand-200 text-brand-800 text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer">
+                <i class="ph-bold ph-upload-simple"></i> Upload Fotos
+              </button>
+              <input id="prodGalleryFileInput" type="file" accept="image/*" multiple onchange="handleProductGalleryUpload(event)" class="hidden" />
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <input id="prodGalleryLinkInput" type="url" placeholder="Cole o link de outra foto do produto e clique em Adicionar..." class="flex-1 px-3 py-2 rounded-xl bg-white border border-nude-200 text-xs sm:text-sm outline-none focus:border-brand-400" />
+            <button type="button" onclick="addProductGalleryLink()" class="px-3.5 py-2 rounded-xl bg-nude-900 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0">
+              + Link
+            </button>
+          </div>
+
+          <div id="prodGalleryPreviewList" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 pt-1"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">Descrição</label>
+          <textarea id="prodDescription" rows="2" placeholder="Descreva a fragrância, ocasião de uso e fixação..." class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2.5 pt-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-sm font-semibold cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-soft cursor-pointer">
+            Salvar Produto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: CUSTOMER CRM FORM (ADMIN & VIP SIGNUP)
+  ====================================================================== -->
+  <div id="customerModal" class="hidden fixed inset-0 z-[75] bg-nude-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 border border-nude-200 shadow-floating my-8 relative">
+      <button onclick="closeCustomerModal()" class="absolute top-5 right-5 p-2 rounded-full hover:bg-nude-100 text-nude-700 cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+
+      <h3 id="customerModalTitle" class="font-editorial text-3xl font-bold text-nude-900 mb-1">Cadastro no CRM</h3>
+      <p id="customerModalSubtitle" class="text-xs text-nude-700 mb-5">Registre os dados e preferências da cliente na Leles Parfun.</p>
+
+      <form id="customerForm" onsubmit="saveCustomerFromModal(event)" class="space-y-4">
+        <input type="hidden" id="custEditId" />
+        <input type="hidden" id="custIsPublicVip" value="0" />
+
+        <div class="grid sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Nome Completo *</label>
+            <input id="custName" type="text" required placeholder="Ex.: Ana Clara Ribeiro" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">WhatsApp *</label>
+            <input id="custPhone" type="tel" required placeholder="(33) 98888-7777" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">E-mail</label>
+            <input id="custEmail" type="email" placeholder="ana@email.com" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Preferência Olfativa</label>
+            <select id="custPreference" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400">
+              <option value="Floral & Delicado">Floral & Delicado</option>
+              <option value="Adocicado & Baunilha">Adocicado & Baunilha</option>
+              <option value="Amadeirado & Marcante">Amadeirado & Marcante</option>
+              <option value="Cuidados Corporais">Cuidados Corporais</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="custAdminStageWrapper" class="grid sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Estágio no CRM</label>
+            <select id="custStage" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400">
+              <option value="Novo Lead">Novo Lead</option>
+              <option value="Cliente Ativo">Cliente Ativo</option>
+              <option value="VIP Recorrente">VIP Recorrente</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Cidade / Bairro</label>
+            <input id="custCity" type="text" placeholder="Ex.: Caratinga - Centro" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">Observações / Histórico</label>
+          <textarea id="custNotes" rows="2" placeholder="Perfumes favoritos, ocasiões especiais, aniversário..." class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2.5 pt-2">
+          <button type="button" onclick="closeCustomerModal()" class="px-4 py-2.5 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-sm font-semibold cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-soft cursor-pointer">
+            Salvar Cadastro
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: CHECKOUT
+  ====================================================================== -->
+  <div id="checkoutModal" class="hidden fixed inset-0 z-[75] bg-nude-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-nude-200 shadow-floating my-8 relative">
+      <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 p-2 rounded-full hover:bg-nude-100 text-nude-700 cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+
+      <h3 class="font-editorial text-3xl font-bold text-nude-900 mb-1">Finalizar Pedido</h3>
+      <p class="text-xs text-nude-700 mb-4">Seus dados serão salvos no CRM e o estoque será atualizado automaticamente.</p>
+
+      <form id="checkoutForm" onsubmit="submitOrderCheckout(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">Nome Completo *</label>
+          <input id="chkName" type="text" required placeholder="Seu nome completo" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">WhatsApp *</label>
+            <input id="chkPhone" type="tel" required placeholder="(33) 99999-9999" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-nude-800 mb-1">Forma de Pagamento</label>
+            <select id="chkPayment" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400">
+              <option value="PIX (5% de atenção)">PIX</option>
+              <option value="Cartão de Crédito (até 6x)">Cartão de Crédito (até 6x)</option>
+              <option value="Dinheiro / Entrega">Dinheiro / Entrega</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">Endereço de Entrega *</label>
+          <input id="chkAddress" type="text" required placeholder="Rua, número, bairro e cidade" class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-nude-800 mb-1">Observações do Pedido</label>
+          <input id="chkNotes" type="text" placeholder="Ex.: Embalagem de presente, entregar à tarde..." class="w-full px-3.5 py-2.5 rounded-xl bg-nude-50 border border-nude-200 text-sm outline-none focus:border-brand-400" />
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-soft transition cursor-pointer mt-2">
+          Confirmar Pedido Leles Parfun
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: FRAGRANCE QUIZ
+  ====================================================================== -->
+  <div id="quizModal" class="hidden fixed inset-0 z-[75] bg-nude-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-nude-200 shadow-floating relative">
+      <button onclick="closeQuizModal()" class="absolute top-5 right-5 p-2 rounded-full hover:bg-nude-100 text-nude-700 cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+
+      <div id="quizStepContent"></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: PRINTABLE ORDER RECEIPT & COUPON
+  ====================================================================== -->
+  <div id="receiptModal" class="hidden fixed inset-0 z-[80] bg-nude-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 border border-nude-200 shadow-floating my-8">
+      <div id="receiptPrintArea" class="space-y-4 text-sm text-nude-900"></div>
+      <div class="flex flex-wrap justify-end gap-2 mt-6 pt-4 border-t border-nude-200">
+        <button onclick="closeReceiptModal()" class="px-4 py-2 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-xs font-semibold cursor-pointer">
+          Fechar
+        </button>
+        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+          <i class="ph-bold ph-printer"></i> Imprimir Recibo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================================
+    // ESTADO PADRÃO E PERSISTÊNCIA (LOCALSTORAGE)
+    // =====================================================================
+    const STORAGE_KEY = 'leles_parfun_system_v2';
+
+    const DEFAULT_STATE = {
+      adminAuth: {
+        passwordHash: '',
+        passwordPlain: 'admin123',
+        masterCode: 'LELES2026',
+        hint: 'Padrão inicial: admin123',
+        logs: [
+          {
+            id: 'log-1',
+            action: 'Sistema Leles Parfun inicializado com segurança',
+            timestamp: new Date().toLocaleString('pt-BR')
+          }
+        ]
+      },
+      cms: {
+        brandName: 'Leles Parfun',
+        brandTagline: 'Essência & Elegância',
+        promoTopText: 'Frete grátis em compras acima de R$ 199 • Use o cupom LELES15 e ganhe 15% OFF',
+        heroBadge: 'Campanha Especial • Fragrâncias Exclusivas',
+        heroTitle: 'A arte de perfumar seus melhores momentos com Leles Parfun',
+        heroSubtitle: 'Inspirada na praticidade e no encantamento dos catálogos icônicos, nossa curadoria reúne perfumes autorais, colônias envolventes e cuidados corporais em tons suaves de rosa e nude.',
+        storeWhatsapp: '5533999990000',
+        themePreset: 'rose-nude',
+        primaryColor: '#C43E5B',
+        bgColor: '#FAF6F2',
+        couponCode: 'LELES15',
+        couponDiscount: 15,
+        freeShippingMin: 199
+      },
+      products: [
+        {
+          id: 'p-1',
+          sku: 'LP-101',
+          name: 'Rosa de Cetim & Baunilha Nude',
+          category: 'Perfumaria Feminina',
+          price: 159.90,
+          stock: 18,
+          volume: '100ml',
+          badge: 'Mais Vendido',
+          notes: 'Rosa Damascena, Flor de Algodão, Baunilha',
+          image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&q=80',
+          description: 'Fragrância feminina envolvente com toque aveludado de rosa e fundo cremoso de baunilha.'
+        },
+        {
+          id: 'p-2',
+          sku: 'LP-102',
+          name: 'Pétala Rosé Eau de Parfum',
+          category: 'Perfumaria Feminina',
+          price: 174.90,
+          stock: 6,
+          volume: '75ml',
+          badge: 'Lançamento',
+          notes: 'Peônia Rosa, Framboesa, Almíscar',
+          image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=900&q=80',
+          description: 'Elegância moderna para o dia e a noite, combinando frescor frutado com coração floral.'
+        },
+        {
+          id: 'p-3',
+          sku: 'LP-103',
+          name: 'Nude Bourbon & Âmbar',
+          category: 'Perfumaria Feminina',
+          price: 149.00,
+          stock: 14,
+          volume: '100ml',
+          badge: 'Oferta Especial',
+          notes: 'Flor de Laranjeira, Âmbar Dourado, Fava Tonka',
+          image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?auto=format&fit=crop&w=900&q=80',
+          description: 'Assinatura quente e sofisticada com rastro acolhedor em tons de âmbar e nude.'
+        },
+        {
+          id: 'p-4',
+          sku: 'LP-201',
+          name: 'Vespera Cedar & Vetiver',
+          category: 'Perfumaria Masculina',
+          price: 164.90,
+          stock: 12,
+          volume: '100ml',
+          badge: 'Mais Vendido',
+          notes: 'Bergamota, Cedro Branco, Vetiver',
+          image: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=900&q=80',
+          description: 'Perfumaria masculina refinada com saída cítrica vibrante e base amadeirada elegante.'
+        },
+        {
+          id: 'p-5',
+          sku: 'LP-301',
+          name: 'Bruma Champagne & Magnólia',
+          category: 'Colônias & Body Splash',
+          price: 79.90,
+          stock: 25,
+          volume: '200ml',
+          badge: 'Lançamento',
+          notes: 'Pêssego, Magnólia, Chá Branco',
+          image: 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?auto=format&fit=crop&w=900&q=80',
+          description: 'Body splash refrescante para reaplicar ao longo do dia com sensação leve e radiante.'
+        },
+        {
+          id: 'p-6',
+          sku: 'LP-401',
+          name: 'Creme Acetinado Bege Imperial',
+          category: 'Cuidados Corporais',
+          price: 64.90,
+          stock: 4,
+          volume: '250g',
+          badge: 'Oferta Especial',
+          notes: 'Manteiga de Karité, Amêndoas, Rosa Suave',
+          image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=900&q=80',
+          description: 'Hidratação profunda com textura sedosa e rápida absorção, deixando a pele macia e perfumada.'
+        },
+        {
+          id: 'p-7',
+          sku: 'LP-501',
+          name: 'Kit Presente Leles Encanto',
+          category: 'Kits & Presentes',
+          price: 219.90,
+          stock: 9,
+          volume: 'Kit 3 peças',
+          badge: 'Mais Vendido',
+          notes: 'Rosa de Cetim, Creme Acetinado, Miniatura',
+          image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=900&q=80',
+          description: 'Estojo presenteável exclusivo da Leles Parfun com fragrância principal, hidratante e miniatura.'
+        }
+      ],
+      customers: [
+        {
+          id: 'c-1',
+          name: 'Camila Ferreira',
+          phone: '(33) 99811-2233',
+          email: 'camila.ferreira@exemplo.com',
+          preference: 'Floral & Delicado',
+          stage: 'VIP Recorrente',
+          city: 'Caratinga - Centro',
+          notes: 'Ama fragrâncias florais suaves e kits de presente.',
+          ordersCount: 4,
+          totalSpent: 648.70
+        },
+        {
+          id: 'c-2',
+          name: 'Rafael Mendes',
+          phone: '(33) 99744-5566',
+          email: 'rafael.mendes@exemplo.com',
+          preference: 'Amadeirado & Marcante',
+          stage: 'Cliente Ativo',
+          city: 'Ipatinga - Horto',
+          notes: 'Prefere notas amadeiradas para uso noturno.',
+          ordersCount: 2,
+          totalSpent: 329.80
+        },
+        {
+          id: 'c-3',
+          name: 'Beatriz Oliveira',
+          phone: '(33) 99622-8899',
+          email: 'beatriz.oli@exemplo.com',
+          preference: 'Adocicado & Baunilha',
+          stage: 'Novo Lead',
+          city: 'Governador Valadares',
+          notes: 'Cadastrou-se para receber novidades de baunilha.',
+          ordersCount: 0,
+          totalSpent: 0
+        }
+      ],
+      orders: [
+        {
+          id: 'LP-8041',
+          customerName: 'Camila Ferreira',
+          phone: '(33) 99811-2233',
+          address: 'Rua Princesa Isabel, 145 - Centro, Caratinga - MG',
+          payment: 'PIX',
+          status: 'Entregue',
+          date: '14/11/2026',
+          items: [
+            { productId: 'p-1', name: 'Rosa de Cetim & Baunilha Nude', qty: 1, price: 159.90 },
+            { productId: 'p-6', name: 'Creme Acetinado Bege Imperial', qty: 1, price: 64.90 }
+          ],
+          subtotal: 224.80,
+          discount: 33.72,
+          shipping: 0,
+          total: 191.08,
+          coupon: 'LELES15',
+          notes: 'Embalar com fita rosa.'
+        }
+      ],
+      cart: [
+        { productId: 'p-1', qty: 1 }
+      ],
+      wishlist: ['p-2', 'p-7'],
+      loggedCustomerId: 'c-1',
+      customerPortalTab: 'orders',
+      appliedCoupon: null,
+      shippingCost: 0,
+      shippingZip: ''
+    };
+
+    let state = loadState();
+    let activeCategory = 'Todos';
+    let searchQuery = '';
+    let isAdminAuthenticated = false;
+    let activeAdminTab = 'dashboard';
+    let quizStep = 0;
+    let quizAnswers = {};
+    let draftProductGallery = [];
+    const cardSlideIndexMap = {};
+
+    function getProductGalleryImages(prod) {
+      if (!prod) return ['https://placehold.co/600x600/FCE7EA/A42D49?text=Leles+Parfun'];
+      const list = Array.isArray(prod.gallery) ? prod.gallery.filter(Boolean) : [];
+      const merged = [prod.image, ...list].filter(Boolean);
+      const unique = [...new Set(merged)];
+      return unique.length ? unique : ['https://placehold.co/600x600/FCE7EA/A42D49?text=Leles+Parfun'];
+    }
+
+    function cycleProductCardImage(productId, delta, specificIndex = null) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+      const imgs = getProductGalleryImages(prod);
+      if (imgs.length <= 1) return;
+
+      const current = cardSlideIndexMap[productId] || 0;
+      const next = typeof specificIndex === 'number'
+        ? ((specificIndex % imgs.length) + imgs.length) % imgs.length
+        : (current + delta + imgs.length) % imgs.length;
+
+      cardSlideIndexMap[productId] = next;
+
+      const imgEl = document.getElementById(`card-img-${productId}`);
+      if (imgEl) {
+        imgEl.classList.remove('gallery-slide-anim');
+        void imgEl.offsetWidth;
+        imgEl.src = imgs[next];
+        imgEl.classList.add('gallery-slide-anim');
+      }
+
+      document.querySelectorAll(`[data-dot-product="${productId}"]`).forEach((dot, idx) => {
+        dot.className = idx === next
+          ? 'w-3.5 h-1.5 rounded-full bg-brand-600 transition-all duration-300 cursor-pointer'
+          : 'w-1.5 h-1.5 rounded-full bg-white/85 hover:bg-white transition-all duration-300 cursor-pointer';
+      });
+    }
+
+    function renderDraftGalleryPreviews() {
+      const container = document.getElementById('prodGalleryPreviewList');
+      if (!container) return;
+
+      const mainImg = (document.getElementById('prodImage')?.value || '').trim();
+      const allPreview = [];
+      if (mainImg) allPreview.push({ url: mainImg, isMain: true, galleryIdx: -1 });
+      draftProductGallery.forEach((url, idx) => {
+        if (url && url !== mainImg) {
+          allPreview.push({ url, isMain: false, galleryIdx: idx });
+        }
+      });
+
+      if (!allPreview.length) {
+        container.innerHTML = `<p class="col-span-full text-[11px] text-nude-500">Nenhuma foto extra adicionada ainda.</p>`;
+        return;
+      }
+
+      container.innerHTML = allPreview.map(item => `
+        <div class="relative group rounded-xl overflow-hidden aspect-square bg-white border border-nude-200">
+          <img src="${item.url}" onerror="this.src='https://placehold.co/150x150/FCE7EA/A42D49?text=Foto'" class="w-full h-full object-cover" />
+          ${item.isMain ? `
+            <span class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-nude-900/80 text-white text-[9px] font-bold">Capa</span>
+          ` : `
+            <button type="button" onclick="removeDraftGalleryImage(${item.galleryIdx})" title="Remover foto" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/90 text-white flex items-center justify-center text-xs hover:bg-red-700 cursor-pointer">
+              <i class="ph-bold ph-x"></i>
+            </button>
+          `}
+        </div>
+      `).join('');
+    }
+
+    function addProductGalleryLink() {
+      const input = document.getElementById('prodGalleryLinkInput');
+      const url = (input.value || '').trim();
+      if (!url) {
+        showToast('Cole um link de imagem válido primeiro.', 'error');
+        return;
+      }
+      if (!draftProductGallery.includes(url)) {
+        draftProductGallery.push(url);
+        renderDraftGalleryPreviews();
+        showToast('Foto adicionada à galeria!');
+      }
+      input.value = '';
+    }
+
+    function removeDraftGalleryImage(index) {
+      draftProductGallery.splice(index, 1);
+      renderDraftGalleryPreviews();
+    }
+
+    function handleProductGalleryUpload(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = String(reader.result || '');
+          if (!dataUrl) return;
+          const mainInput = document.getElementById('prodImage');
+          if (!mainInput.value.trim()) {
+            mainInput.value = dataUrl;
+          } else if (!draftProductGallery.includes(dataUrl)) {
+            draftProductGallery.push(dataUrl);
+          }
+          renderDraftGalleryPreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      showToast(`${files.length} foto(s) carregada(s) na galeria!`);
+      event.target.value = '';
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_STATE));
+          return structuredClone(DEFAULT_STATE);
+        }
+        const parsed = JSON.parse(raw);
+        return {
+          ...structuredClone(DEFAULT_STATE),
+          ...parsed,
+          adminAuth: { ...structuredClone(DEFAULT_STATE.adminAuth), ...(parsed.adminAuth || {}) },
+          cms: { ...structuredClone(DEFAULT_STATE.cms), ...(parsed.cms || {}) }
+        };
+      } catch (err) {
+        console.error('Erro ao carregar estado:', err);
+        return structuredClone(DEFAULT_STATE);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        console.error('Erro ao salvar estado:', err);
+        showToast('Aviso: limite de armazenamento local atingido.', 'error');
+      }
+    }
+
+    function formatBRL(value) {
+      return Number(value || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      toast.className = `toast-anim pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-floating border text-xs sm:text-sm font-medium ${
+        isError
+          ? 'bg-red-50 border-red-200 text-red-800'
+          : 'bg-white border-brand-200 text-nude-900'
+      }`;
+      toast.innerHTML = `
+        <i class="ph-fill ${isError ? 'ph-warning-circle text-red-600' : 'ph-check-circle text-brand-600'} text-lg shrink-0"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        toast.style.transition = 'all 0.2s ease';
+        setTimeout(() => toast.remove(), 220);
+      }, 3200);
+    }
+
+    // =====================================================================
+    // CMS & TEMA ROSA / BEGE
+    // =====================================================================
+    function applyCMSConfig() {
+      const cms = state.cms;
+      document.documentElement.style.setProperty('--color-primary', cms.primaryColor || '#C43E5B');
+      document.documentElement.style.setProperty('--bg-page', cms.bgColor || '#FAF6F2');
+      document.body.style.backgroundColor = cms.bgColor || '#FAF6F2';
+
+      document.getElementById('headerBrandName').textContent = cms.brandName;
+      document.getElementById('headerBrandTagline').textContent = cms.brandTagline;
+      document.getElementById('footerBrandName').textContent = cms.brandName;
+      document.getElementById('promoTopText').textContent = cms.promoTopText;
+      document.getElementById('heroBadgeText').textContent = cms.heroBadge;
+      document.getElementById('heroTitle').textContent = cms.heroTitle;
+      document.getElementById('heroSubtitle').textContent = cms.heroSubtitle;
+
+      const featured = state.products[0];
+      if (featured) {
+        document.getElementById('heroFeaturedImg').src = featured.image;
+        document.getElementById('heroFeaturedTitle').textContent = featured.name;
+        document.getElementById('heroFeaturedPrice').textContent = formatBRL(featured.price);
+      }
+    }
+
+    function populateCMSForm() {
+      const cms = state.cms;
+      document.getElementById('cmsBrandName').value = cms.brandName;
+      document.getElementById('cmsBrandTagline').value = cms.brandTagline;
+      document.getElementById('cmsPromoTopText').value = cms.promoTopText;
+      document.getElementById('cmsHeroBadge').value = cms.heroBadge;
+      document.getElementById('cmsStoreWhatsapp').value = cms.storeWhatsapp;
+      document.getElementById('cmsHeroTitle').value = cms.heroTitle;
+      document.getElementById('cmsHeroSubtitle').value = cms.heroSubtitle;
+      document.getElementById('cmsThemePreset').value = cms.themePreset || 'rose-nude';
+      document.getElementById('cmsPrimaryColor').value = cms.primaryColor || '#C43E5B';
+      document.getElementById('cmsBgColor').value = cms.bgColor || '#FAF6F2';
+      document.getElementById('cmsCouponCode').value = cms.couponCode || 'LELES15';
+      document.getElementById('cmsCouponDiscount').value = cms.couponDiscount || 15;
+      document.getElementById('cmsFreeShippingMin').value = cms.freeShippingMin ?? 199;
+    }
+
+    function saveCMSConfig(event) {
+      event.preventDefault();
+      state.cms = {
+        ...state.cms,
+        brandName: document.getElementById('cmsBrandName').value.trim(),
+        brandTagline: document.getElementById('cmsBrandTagline').value.trim(),
+        promoTopText: document.getElementById('cmsPromoTopText').value.trim(),
+        heroBadge: document.getElementById('cmsHeroBadge').value.trim(),
+        storeWhatsapp: document.getElementById('cmsStoreWhatsapp').value.replace(/\D/g, '') || '5533999990000',
+        heroTitle: document.getElementById('cmsHeroTitle').value.trim(),
+        heroSubtitle: document.getElementById('cmsHeroSubtitle').value.trim(),
+        themePreset: document.getElementById('cmsThemePreset').value,
+        primaryColor: document.getElementById('cmsPrimaryColor').value,
+        bgColor: document.getElementById('cmsBgColor').value,
+        couponCode: document.getElementById('cmsCouponCode').value.trim().toUpperCase(),
+        couponDiscount: Number(document.getElementById('cmsCouponDiscount').value) || 15,
+        freeShippingMin: Number(document.getElementById('cmsFreeShippingMin').value) || 0
+      };
+      addSecurityLog('Configurações visuais da página (CMS) atualizadas');
+      saveState();
+      applyCMSConfig();
+      renderCartDrawer();
+      showToast('Página Leles Parfun atualizada com sucesso!');
+    }
+
+    // =====================================================================
+    // VITRINE PÚBLICA (CATÁLOGO AVON)
+    // =====================================================================
+    function handleSearchInput(val) {
+      searchQuery = val.trim().toLowerCase();
+      const dInput = document.getElementById('searchInputDesktop');
+      const mInput = document.getElementById('searchInputMobile');
+      if (dInput && dInput.value !== val) dInput.value = val;
+      if (mInput && mInput.value !== val) mInput.value = val;
+      renderStorefront();
+    }
+
+    function resetCatalogFilters() {
+      activeCategory = 'Todos';
+      searchQuery = '';
+      document.getElementById('sortSelect').value = 'featured';
+      handleSearchInput('');
+    }
+
+    function renderCategoryTabs() {
+      const categories = ['Todos', ...new Set(state.products.map(p => p.category))];
+      const container = document.getElementById('categoryTabs');
+      container.innerHTML = categories.map(cat => {
+        const active = activeCategory === cat;
+        return `
+          <button
+            onclick="selectCategory('${cat.replace(/'/g, "\\'")}')"
+            class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer ${
+              active
+                ? 'bg-brand-600 text-white shadow-soft'
+                : 'bg-white hover:bg-brand-50 text-nude-800 border border-nude-200'
+            }"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      activeCategory = cat;
+      renderStorefront();
+    }
+
+    function renderStorefront() {
+      renderCategoryTabs();
+      const grid = document.getElementById('productsGrid');
+      const emptyState = document.getElementById('emptyCatalogState');
+      const sortBy = document.getElementById('sortSelect').value;
+
+      let filtered = state.products.filter(p => {
+        const matchesCat = activeCategory === 'Todos' || p.category === activeCategory;
+        const matchesSearch = !searchQuery ||
+          p.name.toLowerCase().includes(searchQuery) ||
+          p.category.toLowerCase().includes(searchQuery) ||
+          (p.notes || '').toLowerCase().includes(searchQuery) ||
+          (p.description || '').toLowerCase().includes(searchQuery);
+        return matchesCat && matchesSearch;
+      });
+
+      if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+      if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+      if (sortBy === 'name-asc') filtered.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+      document.getElementById('catalogCountLabel').textContent =
+        `${filtered.length} ${filtered.length === 1 ? 'produto' : 'produtos'}`;
+
+      if (!filtered.length) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(prod => {
+        const isWished = state.wishlist.includes(prod.id);
+        const outOfStock = Number(prod.stock) <= 0;
+        const installment = (prod.price / 6).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const galleryImgs = getProductGalleryImages(prod);
+        const activeSlide = cardSlideIndexMap[prod.id] || 0;
+        const currentImg = galleryImgs[activeSlide] || galleryImgs[0];
+
+        return `
+          <article class="product-card bg-white rounded-3xl p-4 border border-nude-200/90 shadow-card flex flex-col justify-between">
+            <div>
+              <div class="relative rounded-2xl overflow-hidden aspect-square bg-nude-100 mb-3.5 group">
+                <img
+                  id="card-img-${prod.id}"
+                  src="${currentImg}"
+                  onerror="this.src='https://placehold.co/600x600/FCE7EA/A42D49?text=Leles+Parfun'"
+                  alt="${prod.name}"
+                  class="gallery-slide-anim w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                />
+                ${galleryImgs.length > 1 ? `
+                  <button
+                    type="button"
+                    onclick="cycleProductCardImage('${prod.id}', -1)"
+                    aria-label="Foto anterior"
+                    class="opacity-90 sm:opacity-0 sm:group-hover:opacity-100 absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-nude-900 shadow flex items-center justify-center transition cursor-pointer"
+                  >
+                    <i class="ph-bold ph-caret-left"></i>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="cycleProductCardImage('${prod.id}', 1)"
+                    aria-label="Próxima foto"
+                    class="opacity-90 sm:opacity-0 sm:group-hover:opacity-100 absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-nude-900 shadow flex items-center justify-center transition cursor-pointer"
+                  >
+                    <i class="ph-bold ph-caret-right"></i>
+                  </button>
+                  <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-nude-900/35 backdrop-blur-xs px-2.5 py-1 rounded-full">
+                    ${galleryImgs.map((_, dotIdx) => `
+                      <button
+                        type="button"
+                        data-dot-product="${prod.id}"
+                        onclick="cycleProductCardImage('${prod.id}', 0, ${dotIdx})"
+                        aria-label="Ver foto ${dotIdx + 1}"
+                        class="${dotIdx === activeSlide ? 'w-3.5 h-1.5 rounded-full bg-brand-600 transition-all duration-300 cursor-pointer' : 'w-1.5 h-1.5 rounded-full bg-white/85 hover:bg-white transition-all duration-300 cursor-pointer'}"
+                      ></button>
+                    `).join('')}
+                  </div>
+                ` : ''}
+                ${prod.badge ? `
+                  <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/95 text-brand-700 shadow-xs">
+                    ${prod.badge}
+                  </span>
+                ` : ''}
+                <button
+                  onclick="toggleWishlist('${prod.id}')"
+                  aria-label="Favoritar ${prod.name}"
+                  class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 hover:bg-brand-50 flex items-center justify-center shadow-xs transition cursor-pointer ${
+                    isWished ? 'text-brand-600' : 'text-nude-500'
+                  }"
+                >
+                  <i class="${isWished ? 'ph-fill' : 'ph-bold'} ph-heart text-lg"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 text-[11px] text-brand-700 font-semibold mb-1">
+                <span>${prod.category}</span>
+                <span class="text-nude-500">${prod.volume || ''}</span>
+              </div>
+
+              <h3 class="font-editorial text-2xl font-bold text-nude-900 leading-snug">
+                ${prod.name}
+              </h3>
+
+              <p class="text-xs text-nude-700 mt-1 line-clamp-2">
+                ${prod.description || 'Fragrância exclusiva da linha Leles Parfun.'}
+              </p>
+
+              ${prod.notes ? `
+                <p class="text-[11px] text-nude-500 mt-2 truncate">
+                  <strong class="text-nude-700">Notas:</strong> ${prod.notes}
+                </p>
+              ` : ''}
+            </div>
+
+            <div class="pt-4 mt-4 border-t border-nude-100">
+              <div class="flex items-baseline justify-between mb-3">
+                <div>
+                  <span class="text-lg font-extrabold text-nude-900">${formatBRL(prod.price)}</span>
+                  <span class="block text-[11px] text-nude-500">ou 6x de ${installment}</span>
+                </div>
+                <span class="text-[11px] font-semibold ${
+                  outOfStock
+                    ? 'text-red-600'
+                    : prod.stock <= 6
+                      ? 'text-amber-700'
+                      : 'text-emerald-700'
+                }">
+                  ${outOfStock ? 'Esgotado' : `${prod.stock} em estoque`}
+                </span>
+              </div>
+
+              <button
+                onclick="addToCart('${prod.id}')"
+                ${outOfStock ? 'disabled' : ''}
+                class="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 ${
+                  outOfStock
+                    ? 'bg-nude-200 text-nude-500 cursor-not-allowed'
+                    : 'bg-brand-600 hover:bg-brand-700 text-white shadow-soft cursor-pointer'
+                }"
+              >
+                <i class="ph-bold ph-shopping-bag"></i>
+                <span>${outOfStock ? 'Indisponível' : 'Adicionar à Sacola'}</span>
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function quickAddFeatured() {
+      if (state.products[0]) addToCart(state.products[0].id);
+    }
+
+    // =====================================================================
+    // WISHLIST / FAVORITOS
+    // =====================================================================
+    function toggleWishlist(productId) {
+      const idx = state.wishlist.indexOf(productId);
+      if (idx >= 0) {
+        state.wishlist.splice(idx, 1);
+        showToast('Removido da lista de desejos.');
+      } else {
+        state.wishlist.push(productId);
+        showToast('Adicionado aos favoritos!');
+      }
+      saveState();
+      updateBadges();
+      renderStorefront();
+      renderWishlistDrawer();
+      if (state.loggedCustomerId) renderCustomerPortal();
+    }
+
+    function openWishlistDrawer() {
+      renderWishlistDrawer();
+      document.getElementById('wishlistDrawerBackdrop').classList.remove('hidden');
+      document.getElementById('wishlistDrawer').classList.remove('translate-x-full');
+    }
+
+    function closeWishlistDrawer() {
+      document.getElementById('wishlistDrawerBackdrop').classList.add('hidden');
+      document.getElementById('wishlistDrawer').classList.add('translate-x-full');
+    }
+
+    function renderWishlistDrawer() {
+      const container = document.getElementById('wishlistItemsContainer');
+      const items = state.products.filter(p => state.wishlist.includes(p.id));
+      if (!items.length) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-nude-700">
+            <i class="ph ph-heart text-4xl text-brand-300 mb-2"></i>
+            <p class="text-sm font-medium">Sua lista de desejos está vazia.</p>
+            <p class="text-xs text-nude-500 mt-1">Clique no coração dos produtos para salvar aqui.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(prod => `
+        <div class="flex gap-3 p-3 rounded-2xl bg-nude-50 border border-nude-200 items-center">
+          <img src="${prod.image}" onerror="this.src='https://placehold.co/120x120/FCE7EA/A42D49?text=LP'" class="w-16 h-16 rounded-xl object-cover shrink-0" />
+          <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-sm text-nude-900 truncate">${prod.name}</h4>
+            <p class="text-xs font-bold text-brand-700 mt-0.5">${formatBRL(prod.price)}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <button onclick="addToCart('${prod.id}'); closeWishlistDrawer();" class="px-3 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold cursor-pointer">
+                Levar p/ Sacola
+              </button>
+              <button onclick="toggleWishlist('${prod.id}')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-red-50 text-nude-700 hover:text-red-600 border border-nude-200 text-xs cursor-pointer">
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =====================================================================
+    // SACOLA DE COMPRAS, CUPONS, FRETE & CHECKOUT
+    // =====================================================================
+    function updateBadges() {
+      const totalQty = state.cart.reduce((acc, item) => acc + item.qty, 0);
+      const cartBadge = document.getElementById('cartBadge');
+      cartBadge.textContent = totalQty;
+
+      const wishBadge = document.getElementById('wishlistBadge');
+      wishBadge.textContent = state.wishlist.length;
+      wishBadge.classList.toggle('hidden', state.wishlist.length === 0);
+    }
+
+    function toggleCartDrawer(show) {
+      const backdrop = document.getElementById('cartDrawerBackdrop');
+      const drawer = document.getElementById('cartDrawer');
+      if (show) {
+        renderCartDrawer();
+        backdrop.classList.remove('hidden');
+        drawer.classList.remove('translate-x-full');
+      } else {
+        backdrop.classList.add('hidden');
+        drawer.classList.add('translate-x-full');
+      }
+    }
+
+    function addToCart(productId) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod || prod.stock <= 0) {
+        showToast('Produto indisponível no momento.', 'error');
+        return;
+      }
+
+      const existing = state.cart.find(item => item.productId === productId);
+      const currentQty = existing ? existing.qty : 0;
+      if (currentQty + 1 > prod.stock) {
+        showToast(`Estoque máximo disponível: ${prod.stock} un.`, 'error');
+        return;
+      }
+
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        state.cart.push({ productId, qty: 1 });
+      }
+
+      saveState();
+      updateBadges();
+      renderCartDrawer();
+      showToast(`${prod.name} adicionado à sacola!`);
+    }
+
+    function changeCartQty(productId, delta) {
+      const idx = state.cart.findIndex(item => item.productId === productId);
+      if (idx < 0) return;
+      const prod = state.products.find(p => p.id === productId);
+      const nextQty = state.cart[idx].qty + delta;
+
+      if (nextQty <= 0) {
+        state.cart.splice(idx, 1);
+      } else if (prod && nextQty > prod.stock) {
+        showToast(`Limite em estoque: ${prod.stock} un.`, 'error');
+        return;
+      } else {
+        state.cart[idx].qty = nextQty;
+      }
+
+      saveState();
+      updateBadges();
+      renderCartDrawer();
+    }
+
+    function applyCouponCode() {
+      const raw = document.getElementById('couponInput').value.trim().toUpperCase();
+      const activeCmsCode = (state.cms.couponCode || 'LELES15').toUpperCase();
+      const activeCmsDiscount = Number(state.cms.couponDiscount) || 15;
+
+      const coupons = {
+        [activeCmsCode]: activeCmsDiscount,
+        'LELES15': 15,
+        'BEMVINDA10': 10,
+        'VIP20': 20
+      };
+
+      if (!raw) {
+        state.appliedCoupon = null;
+        showToast('Cupom removido.');
+      } else if (coupons[raw]) {
+        state.appliedCoupon = { code: raw, discountPercent: coupons[raw] };
+        showToast(`Cupom ${raw} aplicado (${coupons[raw]}% OFF)!`);
+      } else {
+        showToast('Cupom inválido. Tente LELES15, BEMVINDA10 ou VIP20.', 'error');
+        return;
+      }
+
+      saveState();
+      renderCartDrawer();
+    }
+
+    function maskCep(input) {
+      let v = input.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = `${v.slice(0, 5)}-${v.slice(5)}`;
+      input.value = v;
+    }
+
+    function calculateCartShipping() {
+      const cep = document.getElementById('cartCepInput').value.replace(/\D/g, '');
+      if (cep.length !== 8) {
+        showToast('Digite um CEP válido com 8 dígitos.', 'error');
+        return;
+      }
+      state.shippingZip = cep;
+      const subtotal = getCartSubtotal();
+      const freeMin = Number(state.cms.freeShippingMin) || 199;
+      state.shippingCost = subtotal >= freeMin || subtotal === 0 ? 0 : 18.90;
+      document.getElementById('shippingEstimateText').textContent =
+        state.shippingCost === 0
+          ? `Frete grátis aplicado para o CEP ${document.getElementById('cartCepInput').value}!`
+          : `Entrega padrão para CEP ${document.getElementById('cartCepInput').value}: ${formatBRL(state.shippingCost)} (3 a 6 dias úteis).`;
+      saveState();
+      renderCartDrawer();
+    }
+
+    function getCartSubtotal() {
+      return state.cart.reduce((sum, item) => {
+        const prod = state.products.find(p => p.id === item.productId);
+        return sum + (prod ? prod.price * item.qty : 0);
+      }, 0);
+    }
+
+    function renderCartDrawer() {
+      const container = document.getElementById('cartItemsContainer');
+      const totalQty = state.cart.reduce((acc, item) => acc + item.qty, 0);
+      document.getElementById('cartItemCountText').textContent =
+        `${totalQty} ${totalQty === 1 ? 'item selecionado' : 'itens selecionados'}`;
+
+      const subtotal = getCartSubtotal();
+      const freeMin = Number(state.cms.freeShippingMin) || 199;
+      const remaining = Math.max(0, freeMin - subtotal);
+      const progressPct = freeMin > 0 ? Math.min(100, Math.round((subtotal / freeMin) * 100)) : 100;
+
+      document.getElementById('freeShippingBar').style.width = `${progressPct}%`;
+      document.getElementById('freeShippingProgressText').textContent =
+        subtotal >= freeMin
+          ? 'Parabéns! Você desbloqueou FRETE GRÁTIS na Leles Parfun.'
+          : `Adicione mais ${formatBRL(remaining)} para ganhar FRETE GRÁTIS.`;
+
+      if (!state.cart.length) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-nude-700">
+            <i class="ph ph-shopping-bag text-4xl text-brand-300 mb-2"></i>
+            <p class="text-sm font-medium">Sua sacola está vazia.</p>
+            <p class="text-xs text-nude-500 mt-1">Explore o catálogo e escolha suas fragrâncias favoritas.</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = state.cart.map(item => {
+          const prod = state.products.find(p => p.id === item.productId);
+          if (!prod) return '';
+          return `
+            <div class="flex gap-3 p-3 rounded-2xl bg-nude-50 border border-nude-200 items-center">
+              <img src="${prod.image}" onerror="this.src='https://placehold.co/120x120/FCE7EA/A42D49?text=LP'" class="w-16 h-16 rounded-xl object-cover shrink-0" />
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-sm text-nude-900 truncate">${prod.name}</h4>
+                <p class="text-xs text-brand-700 font-bold">${formatBRL(prod.price * item.qty)}</p>
+                <div class="flex items-center gap-2 mt-2">
+                  <button onclick="changeCartQty('${prod.id}', -1)" class="w-7 h-7 rounded-lg bg-white border border-nude-200 hover:bg-brand-50 font-bold text-nude-800 cursor-pointer">-</button>
+                  <span class="text-xs font-bold px-1">${item.qty}</span>
+                  <button onclick="changeCartQty('${prod.id}', 1)" class="w-7 h-7 rounded-lg bg-white border border-nude-200 hover:bg-brand-50 font-bold text-nude-800 cursor-pointer">+</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const discount = state.appliedCoupon
+        ? subtotal * (state.appliedCoupon.discountPercent / 100)
+        : 0;
+      const effectiveShipping = subtotal === 0 ? 0 : (subtotal >= freeMin ? 0 : state.shippingCost);
+      const total = Math.max(0, subtotal - discount + effectiveShipping);
+
+      document.getElementById('cartSubtotalLabel').textContent = formatBRL(subtotal);
+      document.getElementById('appliedCouponBadge').textContent =
+        state.appliedCoupon ? `${state.appliedCoupon.code} (-${state.appliedCoupon.discountPercent}%)` : 'nenhum';
+      document.getElementById('cartDiscountLabel').textContent = `- ${formatBRL(discount)}`;
+      document.getElementById('cartShippingLabel').textContent =
+        effectiveShipping === 0 && subtotal > 0 ? 'GRÁTIS' : formatBRL(effectiveShipping);
+      document.getElementById('cartTotalLabel').textContent = formatBRL(total);
+    }
+
+    function openCheckoutModal() {
+      if (!state.cart.length) {
+        showToast('Adicione pelo menos 1 produto à sacola antes de finalizar.', 'error');
+        return;
+      }
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkoutModal').classList.add('hidden');
+    }
+
+    function submitOrderCheckout(event) {
+      event.preventDefault();
+      if (!state.cart.length) return;
+
+      const name = document.getElementById('chkName').value.trim();
+      const phone = document.getElementById('chkPhone').value.trim();
+      const payment = document.getElementById('chkPayment').value;
+      const address = document.getElementById('chkAddress').value.trim();
+      const notes = document.getElementById('chkNotes').value.trim();
+
+      const items = state.cart.map(c => {
+        const prod = state.products.find(p => p.id === c.productId);
+        return {
+          productId: c.productId,
+          name: prod ? prod.name : 'Produto Leles Parfun',
+          qty: c.qty,
+          price: prod ? prod.price : 0
+        };
+      });
+
+      // Abate estoque
+      items.forEach(it => {
+        const prod = state.products.find(p => p.id === it.productId);
+        if (prod) prod.stock = Math.max(0, Number(prod.stock) - it.qty);
+      });
+
+      const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+      const discount = state.appliedCoupon ? subtotal * (state.appliedCoupon.discountPercent / 100) : 0;
+      const freeMin = Number(state.cms.freeShippingMin) || 199;
+      const shipping = subtotal >= freeMin ? 0 : state.shippingCost;
+      const total = Math.max(0, subtotal - discount + shipping);
+
+      const orderId = `LP-${Math.floor(1000 + Math.random() * 9000)}`;
+      const newOrder = {
+        id: orderId,
+        customerName: name,
+        phone,
+        address,
+        payment,
+        status: 'Novo Pedido',
+        date: new Date().toLocaleDateString('pt-BR'),
+        items,
+        subtotal,
+        discount,
+        shipping,
+        total,
+        coupon: state.appliedCoupon ? state.appliedCoupon.code : '',
+        notes
+      };
+
+      state.orders.unshift(newOrder);
+
+      // Atualiza ou cria cliente no CRM
+      const cleanPhone = phone.replace(/\D/g, '');
+      let customer = state.customers.find(c => c.phone.replace(/\D/g, '') === cleanPhone);
+      if (customer) {
+        customer.ordersCount = (Number(customer.ordersCount) || 0) + 1;
+        customer.totalSpent = (Number(customer.totalSpent) || 0) + total;
+        if (customer.ordersCount >= 3) customer.stage = 'VIP Recorrente';
+        else if (customer.stage === 'Novo Lead') customer.stage = 'Cliente Ativo';
+      } else {
+        customer = {
+          id: `c-${Date.now()}`,
+          name,
+          phone,
+          email: '',
+          preference: 'Floral & Delicado',
+          stage: 'Cliente Ativo',
+          city: address,
+          notes: `Cliente criado via pedido ${orderId}.`,
+          ordersCount: 1,
+          totalSpent: total
+        };
+        state.customers.unshift(customer);
+      }
+      state.loggedCustomerId = customer.id;
+      state.appliedCoupon = null;
+      state.shippingCost = 0;
+
+      saveState();
+      updateBadges();
+      renderStorefront();
+      renderCartDrawer();
+      closeCheckoutModal();
+      toggleCartDrawer(false);
+      document.getElementById('checkoutForm').reset();
+
+      showToast(`Pedido ${orderId} registrado com sucesso!`);
+      openOrderReceipt(orderId);
+    }
+
+    // =====================================================================
+    // CAPTAÇÃO DE LEADS & CADASTRO VIP (CRM)
+    // =====================================================================
+    function handleLeadSubmit(event) {
+      event.preventDefault();
+      const name = document.getElementById('leadName').value.trim();
+      const phone = document.getElementById('leadPhone').value.trim();
+      const preference = document.getElementById('leadInterest').value;
+
+      state.customers.unshift({
+        id: `c-${Date.now()}`,
+        name,
+        phone,
+        email: '',
+        preference,
+        stage: 'Novo Lead',
+        city: '',
+        notes: 'Cadastrado na revista / Clube VIP.',
+        ordersCount: 0,
+        totalSpent: 0
+      });
+
+      saveState();
+      document.getElementById('leadCaptureForm').reset();
+      showToast(`Bem-vinda ao Clube Leles Parfun, ${name}!`);
+      if (isAdminAuthenticated) renderCRMTable();
+    }
+
+    function openVipSignupModal() {
+      document.getElementById('custEditId').value = '';
+      document.getElementById('custIsPublicVip').value = '1';
+      document.getElementById('customerForm').reset();
+      document.getElementById('customerModalTitle').textContent = 'Clube VIP Leles Parfun';
+      document.getElementById('customerModalSubtitle').textContent = 'Cadastre-se para receber ofertas exclusivas e recomendações olfativas.';
+      document.getElementById('custAdminStageWrapper').classList.add('hidden');
+      document.getElementById('customerModal').classList.remove('hidden');
+    }
+
+    function openCustomerModal(customerId = null) {
+      document.getElementById('custIsPublicVip').value = '0';
+      document.getElementById('custAdminStageWrapper').classList.remove('hidden');
+      document.getElementById('customerForm').reset();
+
+      if (customerId) {
+        const cust = state.customers.find(c => c.id === customerId);
+        if (!cust) return;
+        document.getElementById('customerModalTitle').textContent = 'Editar Cliente (CRM)';
+        document.getElementById('customerModalSubtitle').textContent = 'Atualize informações, estágio e preferências do cliente.';
+        document.getElementById('custEditId').value = cust.id;
+        document.getElementById('custName').value = cust.name;
+        document.getElementById('custPhone').value = cust.phone;
+        document.getElementById('custEmail').value = cust.email || '';
+        document.getElementById('custPreference').value = cust.preference || 'Floral & Delicado';
+        document.getElementById('custStage').value = cust.stage || 'Novo Lead';
+        document.getElementById('custCity').value = cust.city || '';
+        document.getElementById('custNotes').value = cust.notes || '';
+      } else {
+        document.getElementById('customerModalTitle').textContent = 'Novo Cliente no CRM';
+        document.getElementById('customerModalSubtitle').textContent = 'Adicione um novo cliente ou lead à base da Leles Parfun.';
+        document.getElementById('custEditId').value = '';
+      }
+
+      document.getElementById('customerModal').classList.remove('hidden');
+    }
+
+    function closeCustomerModal() {
+      document.getElementById('customerModal').classList.add('hidden');
+    }
+
+    function saveCustomerFromModal(event) {
+      event.preventDefault();
+      const editId = document.getElementById('custEditId').value;
+      const isPublicVip = document.getElementById('custIsPublicVip').value === '1';
+
+      const payload = {
+        name: document.getElementById('custName').value.trim(),
+        phone: document.getElementById('custPhone').value.trim(),
+        email: document.getElementById('custEmail').value.trim(),
+        preference: document.getElementById('custPreference').value,
+        stage: isPublicVip ? 'Novo Lead' : document.getElementById('custStage').value,
+        city: document.getElementById('custCity').value.trim(),
+        notes: document.getElementById('custNotes').value.trim()
+      };
+
+      if (editId) {
+        const idx = state.customers.findIndex(c => c.id === editId);
+        if (idx >= 0) {
+          state.customers[idx] = { ...state.customers[idx], ...payload };
+          showToast('Cliente atualizado no CRM!');
+        }
+      } else {
+        state.customers.unshift({
+          id: `c-${Date.now()}`,
+          ...payload,
+          ordersCount: 0,
+          totalSpent: 0
+        });
+        showToast(isPublicVip ? 'Cadastro no Clube VIP realizado!' : 'Novo cliente adicionado ao CRM!');
+      }
+
+      saveState();
+      closeCustomerModal();
+      if (isAdminAuthenticated) {
+        renderCRMTable();
+        renderDashboard();
+      }
+    }
+
+    function deleteCustomer(customerId) {
+      state.customers = state.customers.filter(c => c.id !== customerId);
+      saveState();
+      renderCRMTable();
+      renderDashboard();
+      showToast('Cliente removido do CRM.');
+    }
+
+    function messageCustomerWhatsapp(customerId) {
+      const cust = state.customers.find(c => c.id === customerId);
+      if (!cust) return;
+      const digits = cust.phone.replace(/\D/g, '');
+      const phoneWithCountry = digits.startsWith('55') ? digits : `55${digits}`;
+      const text = encodeURIComponent(
+        `Olá ${cust.name}! Aqui é da ${state.cms.brandName}. Temos novidades especiais na linha ${cust.preference} para você!`
+      );
+      window.open(`https://wa.me/${phoneWithCountry}?text=${text}`, '_blank');
+    }
+
+    function contactStoreWhatsapp() {
+      const phone = state.cms.storeWhatsapp || '5533999990000';
+      const text = encodeURIComponent(`Olá ${state.cms.brandName}! Gostaria de atendimento sobre o catálogo.`);
+      window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+    }
+
+    // =====================================================================
+    // QUIZ DE FRAGRÂNCIA
+    // =====================================================================
+    const QUIZ_QUESTIONS = [
+      {
+        question: 'Qual momento do dia combina mais com você?',
+        options: [
+          { label: 'Manhãs ensolaradas e frescas', tag: 'Floral & Delicado' },
+          { label: 'Encontros especiais e noites doces', tag: 'Adocicado & Baunilha' },
+          { label: 'Eventos marcantes e presença forte', tag: 'Amadeirado & Marcante' },
+          { label: 'Pós-banho relaxante e aconchegante', tag: 'Cuidados Corporais' }
+        ]
+      },
+      {
+        question: 'Qual sensação você busca ao se perfumar?',
+        options: [
+          { label: 'Delicadeza, flores e feminilidade', tag: 'Floral & Delicado' },
+          { label: 'Aconchego, baunilha e carinho', tag: 'Adocicado & Baunilha' },
+          { label: 'Sofisticação, elegância e personalidade', tag: 'Amadeirado & Marcante' },
+          { label: 'Pele macia, hidratada e leve', tag: 'Cuidados Corporais' }
+        ]
+      }
+    ];
+
+    function openQuizModal() {
+      quizStep = 0;
+      quizAnswers = {};
+      renderQuizStep();
+      document.getElementById('quizModal').classList.remove('hidden');
+    }
+
+    function closeQuizModal() {
+      document.getElementById('quizModal').classList.add('hidden');
+    }
+
+    function renderQuizStep() {
+      const container = document.getElementById('quizStepContent');
+      if (quizStep < QUIZ_QUESTIONS.length) {
+        const q = QUIZ_QUESTIONS[quizStep];
+        container.innerHTML = `
+          <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Passo ${quizStep + 1} de ${QUIZ_QUESTIONS.length}</span>
+          <h3 class="font-editorial text-3xl font-bold text-nude-900 mt-1 mb-4">${q.question}</h3>
+          <div class="space-y-2.5">
+            ${q.options.map(opt => `
+              <button
+                onclick="selectQuizOption('${opt.tag.replace(/'/g, "\\'")}')"
+                class="w-full text-left p-3.5 rounded-2xl bg-nude-50 hover:bg-brand-50 border border-nude-200 hover:border-brand-300 text-sm font-medium text-nude-900 transition cursor-pointer"
+              >
+                ${opt.label}
+              </button>
+            `).join('')}
+          </div>
+        `;
+        return;
+      }
+
+      const preferredTag = quizAnswers[1] || quizAnswers[0] || 'Floral & Delicado';
+      const match = state.products.find(p =>
+        preferredTag.includes('Floral') ? p.category.includes('Feminina') :
+        preferredTag.includes('Amadeirado') ? p.category.includes('Masculina') :
+        preferredTag.includes('Cuidados') ? p.category.includes('Cuidados') : true
+      ) || state.products[0];
+
+      container.innerHTML = `
+        <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Resultado Personalizado</span>
+        <h3 class="font-editorial text-3xl font-bold text-nude-900 mt-1">Sua combinação ideal</h3>
+        <p class="text-xs text-nude-700 mb-4">Perfil detectado: <strong>${preferredTag}</strong></p>
+        ${match ? `
+          <div class="flex gap-4 p-4 rounded-2xl bg-brand-50/70 border border-brand-200 items-center mb-5">
+            <img src="${match.image}" onerror="this.src='https://placehold.co/150x150/FCE7EA/A42D49?text=LP'" class="w-20 h-20 rounded-2xl object-cover shrink-0" />
+            <div>
+              <h4 class="font-editorial text-2xl font-bold text-nude-900">${match.name}</h4>
+              <p class="text-xs text-nude-700 mt-0.5">${match.notes || ''}</p>
+              <p class="text-sm font-extrabold text-brand-700 mt-1">${formatBRL(match.price)}</p>
+            </div>
+          </div>
+          <div class="flex gap-2.5">
+            <button onclick="addToCart('${match.id}'); closeQuizModal();" class="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-soft cursor-pointer">
+              Adicionar à Sacola
+            </button>
+            <button onclick="openQuizModal()" class="px-4 py-3 rounded-xl bg-nude-100 hover:bg-nude-200 text-nude-800 text-sm font-semibold cursor-pointer">
+              Refazer
+            </button>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function selectQuizOption(tag) {
+      quizAnswers[quizStep] = tag;
+      quizStep += 1;
+      renderQuizStep();
+    }
+
+    // =====================================================================
+    // AUTENTICAÇÃO & NAVEGAÇÃO DO PAINEL ADMINISTRATIVO
+    // =====================================================================
+    function switchView(viewName) {
+      const storeEl = document.getElementById('storefrontView');
+      const adminEl = document.getElementById('adminView');
+      const custEl = document.getElementById('customerView');
+      const navStore = document.getElementById('navStoreBtn');
+
+      storeEl.classList.add('hidden');
+      adminEl.classList.add('hidden');
+      custEl.classList.add('hidden');
+
+      if (viewName === 'admin') {
+        if (!isAdminAuthenticated) {
+          storeEl.classList.remove('hidden');
+          openAdminLoginModal();
+          return;
+        }
+        adminEl.classList.remove('hidden');
+        navStore.classList.remove('bg-brand-100', 'text-brand-700');
+        navStore.classList.add('bg-white', 'text-nude-700');
+        renderAdminAll();
+      } else if (viewName === 'customer') {
+        custEl.classList.remove('hidden');
+        navStore.classList.remove('bg-brand-100', 'text-brand-700');
+        navStore.classList.add('bg-white', 'text-nude-700');
+        renderCustomerPortal();
+      } else {
+        storeEl.classList.remove('hidden');
+        navStore.classList.add('bg-brand-100', 'text-brand-700');
+        navStore.classList.remove('bg-white', 'text-nude-700');
+        renderStorefront();
+      }
+      updateCustomerNavLabel();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =====================================================================
+    // ÁREA / LOGIN DO CLIENTE (PEDIDOS, TRAJETÓRIA & FAVORITOS)
+    // =====================================================================
+    function openCustomerPortal() {
+      switchView('customer');
+    }
+
+    function updateCustomerNavLabel() {
+      const label = document.getElementById('navCustomerLabel');
+      if (!label) return;
+      const cust = state.customers.find(c => c.id === state.loggedCustomerId);
+      label.textContent = cust ? cust.name.split(' ')[0] : 'Minha Conta';
+    }
+
+    function handleCustomerLogin(event) {
+      event.preventDefault();
+      const raw = document.getElementById('customerLoginIdentifier').value.trim().toLowerCase();
+      const digits = raw.replace(/\D/g, '');
+
+      const found = state.customers.find(c => {
+        const emailMatch = (c.email || '').trim().toLowerCase() === raw;
+        const custDigits = (c.phone || '').replace(/\D/g, '');
+        const phoneMatch = digits.length >= 8 && (custDigits === digits || custDigits.endsWith(digits) || digits.endsWith(custDigits));
+        const nameMatch = (c.name || '').trim().toLowerCase() === raw;
+        return emailMatch || phoneMatch || nameMatch;
+      });
+
+      if (!found) {
+        showToast('Cadastro não encontrado. Clique em "Criar Cadastro" para entrar no Clube VIP.', 'error');
+        return;
+      }
+
+      state.loggedCustomerId = found.id;
+      saveState();
+      updateCustomerNavLabel();
+      renderCustomerPortal();
+      showToast(`Bem-vinda de volta, ${found.name}!`);
+    }
+
+    function logoutCustomerAccount() {
+      state.loggedCustomerId = null;
+      saveState();
+      updateCustomerNavLabel();
+      renderCustomerPortal();
+      showToast('Você saiu da sua conta de cliente.');
+    }
+
+    function switchCustomerPortalTab(tab) {
+      state.customerPortalTab = tab;
+      const ordersBtn = document.getElementById('custTabOrdersBtn');
+      const favBtn = document.getElementById('custTabFavoritesBtn');
+      const ordersSec = document.getElementById('customerOrdersSection');
+      const favSec = document.getElementById('customerFavoritesSection');
+
+      const isOrders = tab === 'orders';
+      ordersBtn.className = isOrders
+        ? 'px-4 py-2.5 rounded-xl bg-brand-600 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer'
+        : 'px-4 py-2.5 rounded-xl bg-white hover:bg-brand-50 text-nude-800 border border-nude-200 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer';
+
+      favBtn.className = !isOrders
+        ? 'px-4 py-2.5 rounded-xl bg-brand-600 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer'
+        : 'px-4 py-2.5 rounded-xl bg-white hover:bg-brand-50 text-nude-800 border border-nude-200 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer';
+
+      ordersSec.classList.toggle('hidden', !isOrders);
+      favSec.classList.toggle('hidden', isOrders);
+    }
+
+    function renderOrderTrajectoryStepper(status) {
+      const steps = ['Novo Pedido', 'Em Separação', 'Enviado', 'Entregue'];
+      const currentIdx = Math.max(0, steps.indexOf(status));
+
+      return `
+        <div class="mt-4 pt-4 border-t border-nude-200/80">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-brand-700 mb-3">
+            Trajetória do Pedido • Etapa atual: ${status}
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            ${steps.map((step, idx) => {
+              const completed = idx <= currentIdx;
+              const isCurrent = idx === currentIdx;
+              return `
+                <div class="p-3 rounded-2xl border transition ${
+                  completed
+                    ? 'bg-brand-50/90 border-brand-200 text-nude-900'
+                    : 'bg-white border-nude-200/70 text-nude-400'
+                }">
+                  <div class="flex items-center justify-between gap-1.5 mb-1">
+                    <span class="text-[11px] font-extrabold ${completed ? 'text-brand-700' : 'text-nude-400'}">
+                      0${idx + 1}
+                    </span>
+                    <i class="${completed ? 'ph-fill ph-check-circle text-brand-600' : 'ph ph-circle text-nude-300'} text-base"></i>
+                  </div>
+                  <p class="text-xs font-bold ${isCurrent ? 'text-brand-800' : ''}">${step}</p>
+                  <p class="text-[10px] mt-0.5 ${completed ? 'text-nude-600' : 'text-nude-400'}">
+                    ${
+                      idx === 0 ? 'Pedido confirmado na loja' :
+                      idx === 1 ? 'Embalagem & seleção' :
+                      idx === 2 ? 'A caminho do endereço' :
+                      'Concluído com sucesso'
+                    }
+                  </p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCustomerPortal() {
+      updateCustomerNavLabel();
+      const loginCard = document.getElementById('customerLoginCard');
+      const dashContent = document.getElementById('customerDashboardContent');
+      const logoutBtn = document.getElementById('customerLogoutBtn');
+
+      const cust = state.customers.find(c => c.id === state.loggedCustomerId);
+      if (!cust) {
+        loginCard.classList.remove('hidden');
+        dashContent.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        return;
+      }
+
+      loginCard.classList.add('hidden');
+      dashContent.classList.remove('hidden');
+      logoutBtn.classList.remove('hidden');
+
+      const custDigits = (cust.phone || '').replace(/\D/g, '');
+      const myOrders = state.orders.filter(o => {
+        const ordDigits = (o.phone || '').replace(/\D/g, '');
+        const byName = (o.customerName || '').trim().toLowerCase() === (cust.name || '').trim().toLowerCase();
+        const byPhone = custDigits && ordDigits && (custDigits === ordDigits || custDigits.endsWith(ordDigits) || ordDigits.endsWith(custDigits));
+        return byName || byPhone;
+      });
+
+      document.getElementById('customerProfileBanner').innerHTML = `
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-nude-500 text-white flex items-center justify-center text-2xl font-bold shrink-0">
+            ${(cust.name || 'C').charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-nude-900">${cust.name}</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">${cust.stage || 'Cliente'}</span>
+            </div>
+            <p class="text-xs text-nude-600 mt-0.5">${cust.phone} ${cust.email ? `• ${cust.email}` : ''} • Preferência: <strong>${cust.preference || 'Floral & Delicado'}</strong></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 text-left sm:text-right">
+          <div>
+            <p class="text-[11px] text-nude-500 uppercase font-semibold">Pedidos</p>
+            <p class="text-lg font-extrabold text-nude-900">${myOrders.length}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-nude-500 uppercase font-semibold">Favoritos</p>
+            <p class="text-lg font-extrabold text-brand-700">${state.wishlist.length}</p>
+          </div>
+        </div>
+      `;
+
+      // Render Orders & Trajectory
+      const ordersContainer = document.getElementById('customerOrdersSection');
+      if (!myOrders.length) {
+        ordersContainer.innerHTML = `
+          <div class="bg-white rounded-3xl p-8 border border-nude-200 text-center space-y-2">
+            <i class="ph ph-package text-4xl text-brand-300"></i>
+            <h3 class="font-editorial text-2xl font-bold text-nude-900">Você ainda não possui pedidos</h3>
+            <p class="text-xs sm:text-sm text-nude-600">Explore nossa revista e adicione fragrâncias à sacola para acompanhar a entrega aqui.</p>
+            <button onclick="switchView('store')" class="mt-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold cursor-pointer">
+              Ver Catálogo Leles Parfun
+            </button>
+          </div>
+        `;
+      } else {
+        ordersContainer.innerHTML = myOrders.map(ord => `
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-nude-200 shadow-card">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-bold text-sm text-nude-900">Pedido #${ord.id}</span>
+                  <span class="text-xs text-nude-500">• ${ord.date}</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">${ord.status}</span>
+                </div>
+                <p class="text-xs text-nude-600 mt-1">Entrega: ${ord.address}</p>
+                <p class="text-xs text-nude-700 mt-1">
+                  <strong>Itens:</strong> ${(ord.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-base font-extrabold text-brand-700">${formatBRL(ord.total)}</span>
+                <button onclick="openOrderReceipt('${ord.id}')" class="px-3.5 py-2 rounded-xl bg-nude-100 hover:bg-brand-50 text-nude-900 text-xs font-semibold inline-flex items-center gap-1 cursor-pointer">
+                  <i class="ph-bold ph-receipt"></i> Comprovante
+                </button>
+              </div>
+            </div>
+            ${renderOrderTrajectoryStepper(ord.status)}
+          </div>
+        `).join('');
+      }
+
+      // Render Favorites
+      const favGrid = document.getElementById('customerFavoritesGrid');
+      const favProducts = state.products.filter(p => state.wishlist.includes(p.id));
+      if (!favProducts.length) {
+        favGrid.innerHTML = `
+          <div class="col-span-full bg-white rounded-3xl p-8 border border-nude-200 text-center space-y-2">
+            <i class="ph ph-heart text-4xl text-brand-300"></i>
+            <h3 class="font-editorial text-2xl font-bold text-nude-900">Nenhum produto favorito salvo</h3>
+            <p class="text-xs sm:text-sm text-nude-600">Clique no ícone de coração nos produtos do catálogo para montar sua lista.</p>
+          </div>
+        `;
+      } else {
+        favGrid.innerHTML = favProducts.map(prod => {
+          const imgs = getProductGalleryImages(prod);
+          return `
+            <div class="bg-white rounded-3xl p-4 border border-nude-200 shadow-card flex flex-col justify-between">
+              <div>
+                <div class="relative rounded-2xl overflow-hidden aspect-square bg-nude-100 mb-3">
+                  <img src="${imgs[0]}" onerror="this.src='https://placehold.co/500x500/FCE7EA/A42D49?text=LP'" alt="${prod.name}" class="w-full h-full object-cover" />
+                  <button onclick="toggleWishlist('${prod.id}')" title="Remover dos favoritos" class="absolute top-2.5 right-2.5 w-9 h-9 rounded-full bg-white/95 text-brand-600 flex items-center justify-center shadow-xs cursor-pointer">
+                    <i class="ph-fill ph-heart text-lg"></i>
+                  </button>
+                </div>
+                <span class="text-[11px] font-semibold text-brand-700">${prod.category}</span>
+                <h4 class="font-editorial text-2xl font-bold text-nude-900 leading-snug">${prod.name}</h4>
+                <p class="text-sm font-extrabold text-nude-900 mt-1">${formatBRL(prod.price)}</p>
+              </div>
+              <button onclick="addToCart('${prod.id}')" class="mt-4 w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <i class="ph-bold ph-shopping-bag"></i> Adicionar à Sacola
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      switchCustomerPortalTab(state.customerPortalTab || 'orders');
+    }
+
+    function openAdminPortal() {
+      switchView('admin');
+    }
+
+    function openAdminLoginModal() {
+      document.getElementById('adminPasswordInput').value = '';
+      document.getElementById('adminLoginModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('adminPasswordInput').focus(), 80);
+    }
+
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').classList.add('hidden');
+    }
+
+    function handleAdminLogin(event) {
+      event.preventDefault();
+      const typed = document.getElementById('adminPasswordInput').value.trim();
+      const currentPass = state.adminAuth.passwordPlain || 'admin123';
+      const masterCode = state.adminAuth.masterCode || 'LELES2026';
+
+      if (typed === currentPass || typed === masterCode) {
+        isAdminAuthenticated = true;
+        addSecurityLog(typed === masterCode ? 'Login via Código Mestre de recuperação' : 'Login administrativo realizado');
+        saveState();
+        closeAdminLoginModal();
+        switchView('admin');
+        showToast('Bem-vindo ao Painel Administrativo Leles Parfun!');
+      } else {
+        showToast('Senha incorreta. Tente novamente.', 'error');
+      }
+    }
+
+    function quickDemoAdminLogin() {
+      isAdminAuthenticated = true;
+      addSecurityLog('Acesso rápido de demonstração ativado');
+      saveState();
+      closeAdminLoginModal();
+      switchView('admin');
+      showToast('Painel Administrativo liberado!');
+    }
+
+    function logoutAdmin() {
+      isAdminAuthenticated = false;
+      addSecurityLog('Sessão administrativa encerrada');
+      saveState();
+      switchView('store');
+      showToast('Você saiu do Painel Administrativo.');
+    }
+
+    function switchAdminTab(tabName) {
+      activeAdminTab = tabName;
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        const active = btn.getAttribute('data-admin-tab') === tabName;
+        btn.className = `admin-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shrink-0 cursor-pointer ${
+          active
+            ? 'bg-brand-600 text-white shadow-sm'
+            : 'bg-white hover:bg-brand-50 text-nude-800 border border-nude-200'
+        }`;
+      });
+
+      document.querySelectorAll('.admin-tab-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== `adminTab-${tabName}`);
+      });
+
+      if (tabName === 'dashboard') renderDashboard();
+      if (tabName === 'products') renderAdminProductsTable();
+      if (tabName === 'crm') renderCRMTable();
+      if (tabName === 'orders') renderOrdersList();
+      if (tabName === 'appearance') populateCMSForm();
+      if (tabName === 'security') renderSecurityTab();
+    }
+
+    function renderAdminAll() {
+      renderDashboard();
+      renderAdminProductsTable();
+      renderCRMTable();
+      renderOrdersList();
+      populateCMSForm();
+      renderSecurityTab();
+    }
+
+    // =====================================================================
+    // ADMIN: DASHBOARD
+    // =====================================================================
+    function renderDashboard() {
+      const totalRevenue = state.orders.reduce((s, o) => s + Number(o.total || 0), 0);
+      const totalOrders = state.orders.length;
+      const totalCustomers = state.customers.length;
+      const totalProducts = state.products.length;
+
+      const kpis = [
+        { label: 'Faturamento Total', value: formatBRL(totalRevenue), icon: 'ph-currency-dollar', accent: 'bg-brand-100 text-brand-700' },
+        { label: 'Pedidos Realizados', value: totalOrders, icon: 'ph-shopping-bag', accent: 'bg-nude-100 text-nude-800' },
+        { label: 'Clientes no CRM', value: totalCustomers, icon: 'ph-users-three', accent: 'bg-brand-100 text-brand-700' },
+        { label: 'Produtos Ativos', value: totalProducts, icon: 'ph-package', accent: 'bg-nude-100 text-nude-800' }
+      ];
+
+      document.getElementById('kpiCardsGrid').innerHTML = kpis.map(k => `
+        <div class="bg-white rounded-3xl p-5 border border-nude-200 shadow-card flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-nude-700">${k.label}</p>
+            <p class="text-2xl sm:text-3xl font-extrabold text-nude-900 mt-1">${k.value}</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl ${k.accent} flex items-center justify-center text-2xl shrink-0">
+            <i class="ph-fill ${k.icon}"></i>
+          </div>
+        </div>
+      `).join('');
+
+      // Category Sales
+      const catTotals = {};
+      state.products.forEach(p => { catTotals[p.category] = catTotals[p.category] || 0; });
+      state.orders.forEach(order => {
+        (order.items || []).forEach(item => {
+          const prod = state.products.find(p => p.id === item.productId);
+          const cat = prod ? prod.category : 'Perfumaria Feminina';
+          catTotals[cat] = (catTotals[cat] || 0) + item.price * item.qty;
+        });
+      });
+
+      const maxVal = Math.max(1, ...Object.values(catTotals));
+      document.getElementById('categorySalesChart').innerHTML = Object.entries(catTotals).map(([cat, val]) => {
+        const pct = Math.round((val / maxVal) * 100);
+        return `
+          <div>
+            <div class="flex justify-between text-xs font-semibold text-nude-800 mb-1">
+              <span>${cat}</span>
+              <span>${formatBRL(val)}</span>
+            </div>
+            <div class="h-2.5 w-full bg-nude-100 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-brand-400 to-brand-600 rounded-full" style="width:${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Low Stock
+      const lowStock = state.products.filter(p => Number(p.stock) <= 6);
+      const lowStockContainer = document.getElementById('lowStockList');
+      if (!lowStock.length) {
+        lowStockContainer.innerHTML = `<p class="text-xs text-nude-700 py-4">Todos os produtos estão com estoque confortável.</p>`;
+      } else {
+        lowStockContainer.innerHTML = lowStock.map(p => `
+          <div class="flex items-center justify-between p-3 rounded-2xl bg-nude-50 border border-nude-200">
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-nude-900 truncate">${p.name}</p>
+              <p class="text-[11px] text-nude-500">SKU: ${p.sku}</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${
+              p.stock === 0 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'
+            }">
+              ${p.stock === 0 ? 'Esgotado' : `${p.stock} un.`}
+            </span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // =====================================================================
+    // ADMIN: PRODUCTS CRUD
+    // =====================================================================
+    function renderAdminProductsTable() {
+      const q = (document.getElementById('adminProductSearch')?.value || '').trim().toLowerCase();
+      const cat = document.getElementById('adminProductCategoryFilter')?.value || 'Todas';
+
+      const list = state.products.filter(p => {
+        const matchCat = cat === 'Todas' || p.category === cat;
+        const matchQ = !q ||
+          p.name.toLowerCase().includes(q) ||
+          (p.sku || '').toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q);
+        return matchCat && matchQ;
+      });
+
+      const tbody = document.getElementById('adminProductsTableBody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-nude-700">Nenhum produto encontrado.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(prod => `
+        <tr class="hover:bg-nude-50/70 transition">
+          <td class="py-3.5 px-4">
+            <div class="flex items-center gap-3">
+              <img src="${prod.image}" onerror="this.src='https://placehold.co/80x80/FCE7EA/A42D49?text=LP'" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-nude-200" />
+              <div>
+                <p class="font-semibold text-nude-900">${prod.name}</p>
+                <p class="text-xs text-nude-500">SKU: ${prod.sku} • ${prod.volume || ''}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 text-xs text-nude-800">${prod.category}</td>
+          <td class="py-3.5 px-4 font-bold text-nude-900">${formatBRL(prod.price)}</td>
+          <td class="py-3.5 px-4">
+            <div class="inline-flex items-center gap-1.5">
+              <button onclick="adjustStock('${prod.id}', -1)" class="w-6 h-6 rounded-md bg-nude-100 hover:bg-nude-200 text-xs font-bold cursor-pointer">-</button>
+              <span class="text-xs font-bold min-w-[28px] text-center">${prod.stock}</span>
+              <button onclick="adjustStock('${prod.id}', 1)" class="w-6 h-6 rounded-md bg-nude-100 hover:bg-nude-200 text-xs font-bold cursor-pointer">+</button>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">
+              ${prod.badge || 'Ativo'}
+            </span>
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <div class="inline-flex items-center gap-1.5">
+              <button onclick="duplicateProduct('${prod.id}')" title="Duplicar" class="p-2 rounded-lg bg-nude-100 hover:bg-nude-200 text-nude-800 cursor-pointer">
+                <i class="ph-bold ph-copy"></i>
+              </button>
+              <button onclick="openProductModal('${prod.id}')" title="Editar" class="p-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 cursor-pointer">
+                <i class="ph-bold ph-pencil-simple"></i>
+              </button>
+              <button onclick="deleteProduct('${prod.id}')" title="Excluir" class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer">
+                <i class="ph-bold ph-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openProductModal(productId = null) {
+      document.getElementById('productForm').reset();
+      draftProductGallery = [];
+      const mainImgInput = document.getElementById('prodImage');
+      mainImgInput.oninput = () => renderDraftGalleryPreviews();
+
+      if (productId) {
+        const prod = state.products.find(p => p.id === productId);
+        if (!prod) return;
+        document.getElementById('productModalTitle').textContent = 'Editar Produto';
+        document.getElementById('prodEditId').value = prod.id;
+        document.getElementById('prodName').value = prod.name;
+        document.getElementById('prodSku').value = prod.sku;
+        document.getElementById('prodCategory').value = prod.category;
+        document.getElementById('prodPrice').value = prod.price;
+        document.getElementById('prodStock').value = prod.stock;
+        document.getElementById('prodVolume').value = prod.volume || '';
+        document.getElementById('prodBadge').value = prod.badge || '';
+        document.getElementById('prodNotes').value = prod.notes || '';
+        document.getElementById('prodImage').value = prod.image;
+        document.getElementById('prodDescription').value = prod.description || '';
+        draftProductGallery = Array.isArray(prod.gallery)
+          ? prod.gallery.filter(u => u && u !== prod.image)
+          : [];
+      } else {
+        document.getElementById('productModalTitle').textContent = 'Novo Produto';
+        document.getElementById('prodEditId').value = '';
+        document.getElementById('prodSku').value = `LP-${Math.floor(100 + Math.random() * 899)}`;
+      }
+      renderDraftGalleryPreviews();
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    function saveProductFromModal(event) {
+      event.preventDefault();
+      const editId = document.getElementById('prodEditId').value;
+      const mainImage = document.getElementById('prodImage').value.trim();
+      const pendingLink = (document.getElementById('prodGalleryLinkInput')?.value || '').trim();
+      if (pendingLink && !draftProductGallery.includes(pendingLink)) {
+        draftProductGallery.push(pendingLink);
+      }
+      const gallery = [...new Set([mainImage, ...draftProductGallery].filter(Boolean))];
+
+      const data = {
+        sku: document.getElementById('prodSku').value.trim().toUpperCase(),
+        name: document.getElementById('prodName').value.trim(),
+        category: document.getElementById('prodCategory').value,
+        price: Number(document.getElementById('prodPrice').value) || 0,
+        stock: Math.max(0, Number(document.getElementById('prodStock').value) || 0),
+        volume: document.getElementById('prodVolume').value.trim(),
+        badge: document.getElementById('prodBadge').value,
+        notes: document.getElementById('prodNotes').value.trim(),
+        image: mainImage,
+        gallery,
+        description: document.getElementById('prodDescription').value.trim()
+      };
+
+      if (editId) {
+        const idx = state.products.findIndex(p => p.id === editId);
+        if (idx >= 0) {
+          state.products[idx] = { ...state.products[idx], ...data };
+          cardSlideIndexMap[editId] = 0;
+          showToast('Produto e galeria atualizados com sucesso!');
+        }
+      } else {
+        const newId = `p-${Date.now()}`;
+        state.products.unshift({ id: newId, ...data });
+        showToast('Novo produto cadastrado na Leles Parfun!');
+      }
+
+      if (document.getElementById('prodGalleryLinkInput')) {
+        document.getElementById('prodGalleryLinkInput').value = '';
+      }
+      draftProductGallery = [];
+      saveState();
+      closeProductModal();
+      renderAdminProductsTable();
+      renderStorefront();
+      renderDashboard();
+    }
+
+    function adjustStock(productId, delta) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+      prod.stock = Math.max(0, Number(prod.stock) + delta);
+      saveState();
+      renderAdminProductsTable();
+      renderStorefront();
+      renderDashboard();
+    }
+
+    function duplicateProduct(productId) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+      state.products.unshift({
+        ...structuredClone(prod),
+        id: `p-${Date.now()}`,
+        sku: `${prod.sku}-C`,
+        name: `${prod.name} (Cópia)`
+      });
+      saveState();
+      renderAdminProductsTable();
+      renderStorefront();
+      showToast('Produto duplicado!');
+    }
+
+    function deleteProduct(productId) {
+      state.products = state.products.filter(p => p.id !== productId);
+      state.cart = state.cart.filter(c => c.productId !== productId);
+      state.wishlist = state.wishlist.filter(id => id !== productId);
+      saveState();
+      updateBadges();
+      renderAdminProductsTable();
+      renderStorefront();
+      renderDashboard();
+      showToast('Produto excluído do catálogo.');
+    }
+
+    // =====================================================================
+    // ADMIN: CRM TABLE
+    // =====================================================================
+    function renderCRMTable() {
+      const q = (document.getElementById('crmSearchInput')?.value || '').trim().toLowerCase();
+      const stage = document.getElementById('crmStageFilter')?.value || 'Todos';
+
+      const list = state.customers.filter(c => {
+        const matchStage = stage === 'Todos' || c.stage === stage;
+        const matchQ = !q ||
+          c.name.toLowerCase().includes(q) ||
+          (c.phone || '').toLowerCase().includes(q) ||
+          (c.email || '').toLowerCase().includes(q) ||
+          (c.preference || '').toLowerCase().includes(q);
+        return matchStage && matchQ;
+      });
+
+      const tbody = document.getElementById('crmTableBody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-nude-700">Nenhum cliente encontrado no CRM.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(cust => `
+        <tr class="hover:bg-nude-50/70 transition">
+          <td class="py-3.5 px-4">
+            <p class="font-semibold text-nude-900">${cust.name}</p>
+            <p class="text-xs text-nude-500">${cust.city || 'Cidade não informada'}</p>
+          </td>
+          <td class="py-3.5 px-4 text-xs">
+            <p class="font-medium text-nude-800">${cust.phone}</p>
+            <p class="text-nude-500">${cust.email || 'Sem e-mail'}</p>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-700">${cust.stage}</span>
+            <p class="text-xs text-nude-700 mt-1">${cust.preference || ''}</p>
+          </td>
+          <td class="py-3.5 px-4 text-xs">
+            <p class="font-bold text-nude-900">${formatBRL(cust.totalSpent || 0)}</p>
+            <p class="text-nude-500">${cust.ordersCount || 0} pedido(s)</p>
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <div class="inline-flex items-center gap-1.5">
+              <button onclick="messageCustomerWhatsapp('${cust.id}')" title="WhatsApp" class="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 cursor-pointer">
+                <i class="ph-bold ph-whatsapp-logo"></i>
+              </button>
+              <button onclick="openCustomerModal('${cust.id}')" title="Editar" class="p-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 cursor-pointer">
+                <i class="ph-bold ph-pencil-simple"></i>
+              </button>
+              <button onclick="deleteCustomer('${cust.id}')" title="Excluir" class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 cursor-pointer">
+                <i class="ph-bold ph-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // =====================================================================
+    // ADMIN: ORDERS & RECEIPT
+    // =====================================================================
+    function renderOrdersList() {
+      const filterStatus = document.getElementById('orderStatusFilter')?.value || 'Todos';
+      const container = document.getElementById('ordersListContainer');
+      const list = state.orders.filter(o => filterStatus === 'Todos' || o.status === filterStatus);
+
+      if (!list.length) {
+        container.innerHTML = `<p class="text-sm text-nude-700 py-6 text-center">Nenhum pedido encontrado neste filtro.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(order => `
+        <div class="p-4 sm:p-5 rounded-2xl bg-nude-50/90 border border-nude-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-sm text-nude-900">#${order.id}</span>
+              <span class="text-xs text-nude-500">• ${order.date}</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-100 text-brand-700">${order.status}</span>
+            </div>
+            <p class="text-sm font-semibold text-nude-900">${order.customerName} — <span class="text-xs font-normal text-nude-700">${order.phone}</span></p>
+            <p class="text-xs text-nude-700">${order.address}</p>
+            <p class="text-xs text-nude-500">
+              Itens: ${(order.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <span class="text-base font-extrabold text-brand-700 mr-1">${formatBRL(order.total)}</span>
+            <select onchange="updateOrderStatus('${order.id}', this.value)" class="px-3 py-2 rounded-xl bg-white border border-nude-200 text-xs font-semibold outline-none cursor-pointer">
+              <option value="Novo Pedido" ${order.status === 'Novo Pedido' ? 'selected' : ''}>Novo Pedido</option>
+              <option value="Em Separação" ${order.status === 'Em Separação' ? 'selected' : ''}>Em Separação</option>
+              <option value="Enviado" ${order.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+              <option value="Entregue" ${order.status === 'Entregue' ? 'selected' : ''}>Entregue</option>
+            </select>
+            <button onclick="openOrderReceipt('${order.id}')" class="px-3 py-2 rounded-xl bg-white hover:bg-brand-50 border border-nude-200 text-xs font-semibold text-nude-900 inline-flex items-center gap-1 cursor-pointer">
+              <i class="ph-bold ph-receipt"></i> Recibo
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateOrderStatus(orderId, newStatus) {
+      const ord = state.orders.find(o => o.id === orderId);
+      if (!ord) return;
+      ord.status = newStatus;
+      saveState();
+      renderOrdersList();
+      showToast(`Pedido #${orderId} atualizado para "${newStatus}".`);
+    }
+
+    function openOrderReceipt(orderId) {
+      const ord = state.orders.find(o => o.id === orderId);
+      if (!ord) return;
+      const featuredLogo = state.products[0]?.image || 'https://placehold.co/120x120/FCE7EA/A42D49?text=LP';
+      const returnCoupon = (state.cms.couponCode || 'LELES15').toUpperCase();
+      const returnDiscount = Number(state.cms.couponDiscount) || 15;
+
+      document.getElementById('receiptPrintArea').innerHTML = `
+        <div class="border-b border-dashed border-nude-300 pb-4 text-center space-y-2">
+          <div class="flex items-center justify-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-nude-500 flex items-center justify-center text-white shadow-soft shrink-0">
+              <i class="ph-fill ph-flower-lotus text-2xl"></i>
+            </div>
+            <img
+              src="${featuredLogo}"
+              onerror="this.src='https://placehold.co/96x96/FCE7EA/A42D49?text=LP'"
+              alt="Logo ${state.cms.brandName}"
+              class="w-12 h-12 rounded-2xl object-cover border border-brand-200 shadow-xs shrink-0"
+            />
+          </div>
+          <div>
+            <h4 class="font-editorial text-3xl font-bold text-nude-900 leading-none">${state.cms.brandName}</h4>
+            <p class="text-[11px] uppercase tracking-widest text-brand-600 font-semibold mt-1">${state.cms.brandTagline}</p>
+            <p class="text-xs text-nude-500 mt-1">Comprovante & Cupom • Pedido #${ord.id} • ${ord.date}</p>
+          </div>
+        </div>
+        <div class="space-y-1 text-xs">
+          <p><strong>Cliente:</strong> ${ord.customerName} (${ord.phone})</p>
+          <p><strong>Endereço:</strong> ${ord.address}</p>
+          <p><strong>Pagamento:</strong> ${ord.payment} • <strong>Status:</strong> ${ord.status}</p>
+        </div>
+        <div class="border-y border-nude-200 py-3 space-y-1.5 text-xs">
+          ${(ord.items || []).map(i => `
+            <div class="flex justify-between">
+              <span>${i.qty}x ${i.name}</span>
+              <span class="font-semibold">${formatBRL(i.price * i.qty)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="space-y-1 text-xs">
+          <div class="flex justify-between"><span>Subtotal</span><span>${formatBRL(ord.subtotal)}</span></div>
+          <div class="flex justify-between"><span>Desconto ${ord.coupon ? `(${ord.coupon})` : ''}</span><span>- ${formatBRL(ord.discount)}</span></div>
+          <div class="flex justify-between"><span>Frete</span><span>${formatBRL(ord.shipping)}</span></div>
+          <div class="flex justify-between text-base font-extrabold text-brand-700 pt-1">
+            <span>Total</span><span>${formatBRL(ord.total)}</span>
+          </div>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-brand-50 border border-dashed border-brand-300 text-center space-y-1">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-brand-700">Cupom da ${state.cms.brandName} para Próxima Compra</p>
+          <p class="text-lg font-extrabold text-nude-900 tracking-wider">${returnCoupon} • ${returnDiscount}% OFF</p>
+          <p class="text-[11px] text-nude-600">Válido na sacola da revista digital Leles Parfun</p>
+        </div>
+      `;
+      document.getElementById('receiptModal').classList.remove('hidden');
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.add('hidden');
+    }
+
+    // =====================================================================
+    // ADMIN: PASSWORD CHANGE & SECURITY LOGS
+    // =====================================================================
+    function updatePasswordStrengthMeter(pass) {
+      const bar = document.getElementById('passwordStrengthBar');
+      const txt = document.getElementById('passwordStrengthText');
+      if (!pass) {
+        bar.style.width = '0%';
+        txt.textContent = 'Força da senha: aguardando nova senha';
+        return;
+      }
+
+      let score = 0;
+      if (pass.length >= 6) score += 25;
+      if (pass.length >= 9) score += 25;
+      if (/[A-Z]/.test(pass) || /[0-9]/.test(pass)) score += 25;
+      if (/[^A-Za-z0-9]/.test(pass)) score += 25;
+
+      bar.style.width = `${score}%`;
+      if (score <= 25) {
+        bar.className = 'h-full bg-red-500 transition-all duration-300';
+        txt.textContent = 'Força da senha: Fraca';
+      } else if (score <= 50) {
+        bar.className = 'h-full bg-amber-500 transition-all duration-300';
+        txt.textContent = 'Força da senha: Moderada';
+      } else {
+        bar.className = 'h-full bg-emerald-600 transition-all duration-300';
+        txt.textContent = 'Força da senha: Forte';
+      }
+    }
+
+    function handleChangeAdminPassword(event) {
+      event.preventDefault();
+      const currentPass = document.getElementById('currentAdminPassword').value.trim();
+      const newPass = document.getElementById('newAdminPassword').value.trim();
+      const confirmPass = document.getElementById('confirmAdminPassword').value.trim();
+      const hint = document.getElementById('adminPasswordHint').value.trim();
+
+      const storedPass = state.adminAuth.passwordPlain || 'admin123';
+      const masterCode = state.adminAuth.masterCode || 'LELES2026';
+
+      if (currentPass !== storedPass && currentPass !== masterCode) {
+        showToast('Senha atual incorreta.', 'error');
+        return;
+      }
+      if (newPass.length < 6) {
+        showToast('A nova senha deve ter pelo menos 6 caracteres.', 'error');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast('A confirmação da senha não confere.', 'error');
+        return;
+      }
+
+      state.adminAuth.passwordPlain = newPass;
+      if (hint) state.adminAuth.hint = hint;
+      addSecurityLog('Senha do administrador alterada com sucesso');
+      saveState();
+
+      document.getElementById('changePasswordForm').reset();
+      updatePasswordStrengthMeter('');
+      renderSecurityTab();
+      showToast('Senha do administrador atualizada!');
+    }
+
+    function addSecurityLog(action) {
+      state.adminAuth.logs = state.adminAuth.logs || [];
+      state.adminAuth.logs.unshift({
+        id: `log-${Date.now()}`,
+        action,
+        timestamp: new Date().toLocaleString('pt-BR')
+      });
+      state.adminAuth.logs = state.adminAuth.logs.slice(0, 20);
+    }
+
+    function renderSecurityTab() {
+      document.getElementById('currentHintBox').innerHTML =
+        `<strong>Dica ativa:</strong> ${state.adminAuth.hint || 'Não definida'}`;
+
+      const logs = state.adminAuth.logs || [];
+      document.getElementById('securityLogsList').innerHTML = logs.map(l => `
+        <div class="p-3 rounded-xl bg-nude-50 border border-nude-200 text-xs flex items-center justify-between gap-2">
+          <span class="font-medium text-nude-900">${l.action}</span>
+          <span class="text-[11px] text-nude-500 shrink-0">${l.timestamp}</span>
+        </div>
+      `).join('');
+    }
+
+    // =====================================================================
+    // EXPORTAÇÃO CSV, BACKUP JSON & RESET
+    // =====================================================================
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportProductsCSV() {
+      const headers = ['SKU', 'Nome', 'Categoria', 'Preco', 'Estoque', 'Volume', 'Selo'];
+      const rows = state.products.map(p => [
+        p.sku,
+        `"${(p.name || '').replace(/"/g, '""')}"`,
+        `"${(p.category || '').replace(/"/g, '""')}"`,
+        p.price,
+        p.stock,
+        `"${(p.volume || '').replace(/"/g, '""')}"`,
+        `"${(p.badge || '').replace(/"/g, '""')}"`
+      ].join(';'));
+      downloadFile([headers.join(';'), ...rows].join('\n'), 'leles-parfun-produtos.csv', 'text/csv;charset=utf-8;');
+      showToast('CSV de produtos exportado!');
+    }
+
+    function exportCustomersCSV() {
+      const headers = ['Nome', 'WhatsApp', 'Email', 'Preferencia', 'Estagio', 'Pedidos', 'TotalGasto'];
+      const rows = state.customers.map(c => [
+        `"${(c.name || '').replace(/"/g, '""')}"`,
+        `"${(c.phone || '').replace(/"/g, '""')}"`,
+        `"${(c.email || '').replace(/"/g, '""')}"`,
+        `"${(c.preference || '').replace(/"/g, '""')}"`,
+        `"${(c.stage || '').replace(/"/g, '""')}"`,
+        c.ordersCount || 0,
+        c.totalSpent || 0
+      ].join(';'));
+      downloadFile([headers.join(';'), ...rows].join('\n'), 'leles-parfun-clientes-crm.csv', 'text/csv;charset=utf-8;');
+      showToast('CSV de clientes CRM exportado!');
+    }
+
+    function exportSystemBackup() {
+      downloadFile(
+        JSON.stringify(state, null, 2),
+        `leles-parfun-backup-${new Date().toISOString().slice(0, 10)}.json`,
+        'application/json'
+      );
+      showToast('Backup completo (.json) exportado!');
+    }
+
+    function importSystemBackup(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed.products) || !Array.isArray(parsed.customers)) {
+            throw new Error('Estrutura inválida');
+          }
+          state = { ...structuredClone(DEFAULT_STATE), ...parsed };
+          addSecurityLog('Backup JSON restaurado no sistema');
+          saveState();
+          applyCMSConfig();
+          updateBadges();
+          renderStorefront();
+          renderAdminAll();
+          showToast('Backup restaurado com sucesso!');
+        } catch (err) {
+          console.error(err);
+          showToast('Arquivo de backup inválido.', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function resetDemoData() {
+      state = structuredClone(DEFAULT_STATE);
+      saveState();
+      applyCMSConfig();
+      updateBadges();
+      renderStorefront();
+      renderAdminAll();
+      showToast('Dados padrão da Leles Parfun restaurados.');
+    }
+
+    // =====================================================================
+    // INICIALIZAÇÃO
+    // =====================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      applyCMSConfig();
+      updateBadges();
+      updateCustomerNavLabel();
+      renderStorefront();
+      renderCartDrawer();
+    });
+  </script>
+</body>
+</html>
